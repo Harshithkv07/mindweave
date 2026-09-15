@@ -1,0 +1,10 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      SECRET_KEY: change-me
+      DATABASE_URL: sqlite:///./mindweave.db
+    volumes:
+      - ./backend:/app

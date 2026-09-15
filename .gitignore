@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.venv/
+.env
+mindweave.db
+node_modules/
+dist/
+.dart_tool/
+build/
+*.log
+.DS_Store
+.idea/
+.vscode/
+.flutter-plugins-dependencies
