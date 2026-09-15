@@ -105,6 +105,7 @@ class _SequenceMemoryScreenState
       attempts: level,
       accuracy: accuracy,
       timeSeconds: 0,
+      gameType: 'sequence_recall',
     );
 
     if (!mounted) return;

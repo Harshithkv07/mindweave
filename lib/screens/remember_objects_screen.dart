@@ -115,6 +115,7 @@ class _RememberObjectsScreenState
       attempts: totalRounds,
       accuracy: accuracy,
       timeSeconds: elapsedSeconds,
+      gameType: 'remember_objects',
     );
 
     if (!mounted) return;

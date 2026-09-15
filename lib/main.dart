@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'screens/login_screen.dart';
+import 'services/storage_service.dart';
+import 'services/mindweave_provider.dart';
 
-void main() {
-  runApp(const MindWeaveApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await StorageService.init();
+  runApp(
+    ChangeNotifierProvider<MindWeaveProvider>(
+      create: (_) => MindWeaveProvider()..init(),
+      child: const MindWeaveApp(),
+    ),
+  );
 }
 
 class MindWeaveApp extends StatelessWidget {
