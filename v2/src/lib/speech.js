@@ -1,101 +1,189 @@
+import { Capacitor } from '@capacitor/core'
+
 /* ==========================================================================
-   Voice — the browser's own speech synthesis. Works offline, no API key.
+   Voice output.
+
+   Android WebView does not implement the Web Speech synthesis API
+   (crbug.com/487255), so `window.speechSynthesis` is silently dead inside the
+   APK even though it works perfectly in a desktop browser. On a native
+   platform we therefore go through @capacitor-community/text-to-speech, and
+   keep the Web Speech path for `npm run dev`.
+
+   Both engines sit behind one API so no screen has to know which is running.
+   Rate is on the same scale for both — 1.0 is normal — because the plugin
+   passes `rate` straight to Android's TextToSpeech.setSpeechRate().
    ========================================================================== */
 
-let current = null
+const native = Capacitor.isNativePlatform()
+
+let plugin = null
+let pluginLoad = null
+
+function getPlugin() {
+  if (!native) return Promise.resolve(null)
+  if (plugin) return Promise.resolve(plugin)
+  pluginLoad ??= import('@capacitor-community/text-to-speech')
+    .then((m) => {
+      plugin = m.TextToSpeech
+      return plugin
+    })
+    .catch(() => null)
+  return pluginLoad
+}
+
+/* Every stop() or new speak() bumps this. A completion whose token no longer
+   matches belongs to an utterance that has since been cancelled, so its onEnd
+   must not fire — otherwise the UI clears the indicator for the wrong clip.
+   This matters on native especially: the plugin's stop() drops its pending
+   callbacks, so those speak() promises never settle at all. */
+let generation = 0
 
 export const speechSupported = () =>
-  typeof window !== 'undefined' && 'speechSynthesis' in window
+  native || (typeof window !== 'undefined' && 'speechSynthesis' in window)
 
-export function speak(text, { rate = 0.85, onEnd, onStart } = {}) {
-  if (!speechSupported()) {
-    onEnd?.()
+export function stop() {
+  generation += 1
+
+  if (native) {
+    getPlugin().then((p) => p?.stop().catch(() => {}))
+    return
+  }
+  if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+    window.speechSynthesis.cancel()
+  }
+}
+
+/**
+ * Speak `text`. Resolves once playback finishes (or fails).
+ * Callers may fire-and-forget — Voice.jsx does — and drive their UI from
+ * onStart/onEnd.
+ */
+export async function speak(text, { lang = 'en-US', rate = 0.9, onStart, onEnd } = {}) {
+  stop()
+  const mine = generation
+
+  const settle = (err) => {
+    if (mine !== generation) return // superseded by a stop or a newer utterance
+    onEnd?.(err)
+  }
+
+  if (!text?.trim()) {
+    settle()
     return
   }
 
-  stop()
+  onStart?.()
 
-  const u = new SpeechSynthesisUtterance(text)
-  u.rate = rate
-  u.pitch = 1
-  u.volume = 1
-  u.lang = 'en-US'
-
-  // Prefer a natural-sounding English voice when the platform offers one.
-  const voices = window.speechSynthesis.getVoices()
-  const preferred =
-    voices.find((v) => /natural|premium|enhanced/i.test(v.name) && v.lang.startsWith('en')) ??
-    voices.find((v) => v.lang === 'en-US') ??
-    voices.find((v) => v.lang.startsWith('en'))
-  if (preferred) u.voice = preferred
-
-  u.onstart = () => onStart?.()
-  u.onend = () => {
-    current = null
-    onEnd?.()
-  }
-  u.onerror = () => {
-    current = null
-    onEnd?.()
+  if (native) {
+    const p = await getPlugin()
+    if (!p) {
+      settle(new Error('tts-unavailable'))
+      return
+    }
+    try {
+      await p.speak({ text, lang, rate, pitch: 1.0, volume: 1.0 })
+      settle()
+    } catch (e) {
+      // The plugin rejects with ERROR_UNSUPPORTED_LANGUAGE when the voice data
+      // for `lang` is not installed. Surface it so the caller can offer the
+      // system installer rather than leaving the patient with silence.
+      settle(e instanceof Error ? e : new Error(String(e?.message ?? e)))
+    }
+    return
   }
 
-  current = u
-  window.speechSynthesis.speak(u)
+  /* ---- web fallback ---- */
+  await new Promise((resolve) => {
+    const u = new SpeechSynthesisUtterance(text)
+    u.lang = lang
+    u.rate = rate
+    u.pitch = 1
+    u.volume = 1
+
+    const voices = window.speechSynthesis.getVoices()
+    const base = lang.split('-')[0]
+    const preferred =
+      voices.find((v) => /natural|premium|enhanced/i.test(v.name) && v.lang.startsWith(base)) ??
+      voices.find((v) => v.lang === lang) ??
+      voices.find((v) => v.lang.startsWith(base))
+    if (preferred) u.voice = preferred
+
+    u.onend = () => {
+      settle()
+      resolve()
+    }
+    u.onerror = () => {
+      settle(new Error('speech-error'))
+      resolve()
+    }
+
+    window.speechSynthesis.speak(u)
+  })
 }
 
-export function stop() {
-  if (!speechSupported()) return
-  window.speechSynthesis.cancel()
-  current = null
+/**
+ * Is there a usable voice for this language on this device?
+ * Tamil and Telugu voice data in particular is often not installed on Android.
+ */
+export async function isLanguageAvailable(lang) {
+  if (native) {
+    const p = await getPlugin()
+    if (!p) return false
+    try {
+      const { supported } = await p.isLanguageSupported({ lang })
+      return Boolean(supported)
+    } catch {
+      return false
+    }
+  }
+
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return false
+  const base = lang.split('-')[0]
+  const voices = await webVoices()
+  // Only claim a language is missing once we have actually seen the list.
+  if (!voices.length) return true
+  return voices.some((v) => v.lang.startsWith(base))
 }
 
-export const isSpeaking = () =>
-  speechSupported() && window.speechSynthesis.speaking
+/* getVoices() returns [] until the engine has enumerated, and Chrome only
+   signals that through `voiceschanged`. Resolving on the first non-empty read
+   avoids telling the patient a voice is missing before we have looked. */
+function webVoices() {
+  return new Promise((resolve) => {
+    const read = () => window.speechSynthesis.getVoices()
 
-/* The five guided care flows carried over from v1's voice assistant. */
-export const CARE_FLOWS = [
-  {
-    id: 'orientation',
-    title: 'Morning orientation',
-    blurb: 'Grounds the day, the date and what comes next.',
-    icon: '🌅',
-    script: (name) =>
-      `Good morning ${name}. Today is ${new Date().toLocaleDateString('en-US', {
-        weekday: 'long',
-        month: 'long',
-        day: 'numeric',
-      })}. You are safe and you are at home. In a little while there will be breakfast, and then some gentle memory activities. There is nothing you need to worry about right now.`,
-  },
-  {
-    id: 'hydration',
-    title: 'Hydration prompt',
-    blurb: 'A gentle nudge toward a glass of water.',
-    icon: '💧',
-    script: (name) =>
-      `${name}, this is a gentle reminder to have some water. A full glass now will help you feel clearer and more comfortable. Take your time, there is no rush.`,
-  },
-  {
-    id: 'medication',
-    title: 'Medication routine',
-    blurb: 'Walks through taking the scheduled dose.',
-    icon: '💊',
-    script: (name) =>
-      `${name}, it is time for your scheduled medication. Find your pill box, take the dose for this time of day, and drink a full glass of water with it. When you have finished, you can mark it as taken.`,
-  },
-  {
-    id: 'encouragement',
-    title: 'Before a memory game',
-    blurb: 'Explains the activity and takes the pressure off.',
-    icon: '🌱',
-    script: (name) =>
-      `${name}, you are about to do a short memory activity. There is no score to worry about and no way to fail. Simply look, take your time, and choose what feels right. Every attempt helps.`,
-  },
-  {
-    id: 'calming',
-    title: 'Calming breath',
-    blurb: 'A guided breath for restless moments.',
-    icon: '🫧',
-    script: () =>
-      `Let us take a moment together. Breathe in slowly through your nose, two, three, four. Hold gently, two, three. And breathe out slowly through your mouth, two, three, four, five. Again. In, two, three, four. Hold. And out, slowly. You are doing beautifully. Let your shoulders drop, and rest here as long as you like.`,
-  },
-]
+    const first = read()
+    if (first.length) {
+      resolve(first)
+      return
+    }
+
+    let settled = false
+    const done = (list) => {
+      if (settled) return
+      settled = true
+      window.speechSynthesis.removeEventListener('voiceschanged', onChange)
+      resolve(list)
+    }
+    const onChange = () => done(read())
+
+    window.speechSynthesis.addEventListener('voiceschanged', onChange)
+    // Some engines never fire the event at all; don't hang on them.
+    setTimeout(() => done(read()), 1500)
+  })
+}
+
+/** Android only: open the system screen for installing TTS voice data. */
+export async function openVoiceInstall() {
+  if (!native) return false
+  const p = await getPlugin()
+  if (!p) return false
+  try {
+    await p.openInstall()
+    return true
+  } catch {
+    return false
+  }
+}
+
+export const isNativeVoice = () => native

@@ -33,4 +33,14 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Android 11+ package visibility. Without this the app cannot see the
+         system text-to-speech engine at all: isLanguageSupported() reports
+         false for everything and openInstall() resolves to nothing, both
+         silently. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
+    </queries>
 </manifest>

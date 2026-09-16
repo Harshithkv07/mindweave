@@ -68,27 +68,22 @@ export function sequenceConfig(sessions) {
   return { tier, ...table[tier] }
 }
 
-/* Narrative insight for the caretaker — last 3 sessions vs the previous 3. */
-export function insight(sessions) {
-  if (sessions.length < 2) {
-    return 'Not enough activity yet. A few more sessions will establish a personal baseline.'
-  }
+/* Narrative insight — last 3 sessions vs the previous 3.
+   Returns a catalog KEY, not prose, so the patient screen can translate it
+   while the caretaker screen renders the English original. */
+export function insightKey(sessions) {
+  if (sessions.length < 2) return 'insight.tooFew'
+
   const recent = sessions.slice(0, 3)
   const older = sessions.slice(3, 6)
   const mean = (xs) => xs.reduce((n, s) => n + s.accuracy, 0) / xs.length
 
-  if (!older.length) {
-    return 'Early days. Keep sessions short and regular to build a reliable baseline.'
-  }
+  if (!older.length) return 'insight.early'
 
   const delta = mean(recent) - mean(older)
-  if (delta <= -20) {
-    return 'Recent sessions are running below the usual personal pattern. Easier activities and a check-in may help.'
-  }
-  if (delta >= 20) {
-    return 'Recent sessions are running above the usual personal pattern. Gradually increasing challenge looks appropriate.'
-  }
-  return 'Performance is broadly consistent with the recent personal pattern.'
+  if (delta <= -20) return 'insight.down'
+  if (delta >= 20) return 'insight.up'
+  return 'insight.steady'
 }
 
 /* A caretaker attention flag, mirroring the v1 backend rule. */

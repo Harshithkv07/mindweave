@@ -1,5 +1,7 @@
-import { useStore, GAME_LABEL, DOMAIN_LABEL } from '../lib/store'
-import { insight } from '../lib/adaptive'
+import { useStore } from '../lib/store'
+import { useT } from '../lib/i18n'
+import { formatDate } from '../lib/i18n/locales'
+import { insightKey } from '../lib/adaptive'
 import TrendChart from '../components/TrendChart'
 import {
   Screen, TopBar, RingButton, Display, Muted, Card, Meter, SectionTitle, Meta, Empty,
@@ -11,6 +13,7 @@ const ICON = { match: '🃏', objects: '🧩', sequence: '🔢' }
 
 export default function Progress({ onBack }) {
   const s = useStore()
+  const { t, language } = useT()
 
   return (
     <Screen>
@@ -18,25 +21,23 @@ export default function Progress({ onBack }) {
         <TopBar
           onBack={onBack}
           right={
-            <RingButton tone="mint" label="Progress">
+            <RingButton tone="mint" label={t('progress.label')}>
               <Chart size={21} />
             </RingButton>
           }
         />
 
         <div className="mt-3">
-          <Display className="text-[34px]">How you&rsquo;re doing</Display>
-          <Muted className="mt-3 max-w-[320px]">
-            Measured against your own pattern over time — never against anybody else.
-          </Muted>
+          <Display className="text-[34px]">{t('progress.title')}</Display>
+          <Muted className="mt-3 max-w-[320px]">{t('progress.body')}</Muted>
         </div>
 
         {/* headline figures */}
         <div className="mt-6 grid grid-cols-2 gap-3.5">
-          <Figure value={s.played} label="Sessions" />
-          <Figure value={s.bestAccuracy ? `${Math.round(s.bestAccuracy)}%` : '—'} label="Best accuracy" />
-          <Figure value={s.bestTime ? `${s.bestTime}s` : '—'} label="Quickest round" />
-          <Figure value={s.totalErrors} label="Missteps" />
+          <Figure value={s.played} label={t('progress.sessions')} />
+          <Figure value={s.bestAccuracy ? `${Math.round(s.bestAccuracy)}%` : '—'} label={t('progress.bestAccuracy')} />
+          <Figure value={s.bestTime ? `${s.bestTime}s` : '—'} label={t('progress.quickest')} />
+          <Figure value={s.totalErrors} label={t('progress.missteps')} />
         </div>
 
         {/* insight */}
@@ -45,26 +46,30 @@ export default function Progress({ onBack }) {
             <Spark size={21} />
           </span>
           <div>
-            <p className="text-[15.5px] leading-[1.55] text-ink-soft">{insight(s.sessions)}</p>
-            <p className="mt-2 text-[12px] text-ink-faint">
-              A personal, longitudinal reading — not a diagnosis.
-            </p>
+            <p className="text-[15.5px] leading-[1.55] text-ink-soft">{t(insightKey(s.sessions))}</p>
+            <p className="mt-2 text-[12px] text-ink-faint">{t('common.notDiagnosis')}</p>
           </div>
         </Card>
 
         {/* trend */}
-        <SectionTitle aside={`${Math.min(7, s.sessions.length)} recent`}>Accuracy trend</SectionTitle>
+        <SectionTitle aside={t('progress.recentCount', { count: Math.min(7, s.sessions.length) })}>
+          {t('progress.trend')}
+        </SectionTitle>
         <Card className="px-3 py-5">
           <TrendChart sessions={s.sessions} />
         </Card>
 
         {/* domains */}
-        <SectionTitle aside={`baseline ${Math.round(s.baseline)}%`}>Four domains</SectionTitle>
+        <SectionTitle aside={t('progress.baselineAside', { value: Math.round(s.baseline) })}>
+          {t('progress.domains')}
+        </SectionTitle>
         <Card variant="glass-solid" className="space-y-5 p-6">
           {Object.entries(s.domains).map(([key, value]) => (
             <div key={key}>
               <div className="mb-2 flex items-baseline justify-between">
-                <span className="text-[15px] font-medium text-ink">{DOMAIN_LABEL[key]}</span>
+                <span className="text-[15px] font-medium leading-snug text-ink">
+                  {t(`domain.${key}`)}
+                </span>
                 <span className="display text-[19px] text-ink-soft">{Math.round(value)}</span>
               </div>
               <Meter value={value} tone={TONE[key]} />
@@ -73,7 +78,7 @@ export default function Progress({ onBack }) {
         </Card>
 
         {/* history */}
-        <SectionTitle>Recent sessions</SectionTitle>
+        <SectionTitle>{t('progress.recent')}</SectionTitle>
         {s.sessions.length ? (
           <Card className="overflow-hidden">
             {s.sessions.slice(0, 8).map((x, i) => (
@@ -85,11 +90,16 @@ export default function Progress({ onBack }) {
                   {ICON[x.game]}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[15.5px] font-medium text-ink">{GAME_LABEL[x.game]}</p>
+                  <p className="text-[15.5px] font-medium leading-snug text-ink">
+                    {t(`gameName.${x.game}`)}
+                  </p>
                   <Meta>
-                    {new Date(x.at).toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}
-                    {' · '}
-                    {x.seconds}s · {x.errors} missteps · {x.difficulty}
+                    {t('progress.sessionMeta', {
+                      date: formatDate(x.at, language),
+                      seconds: x.seconds,
+                      errors: x.errors,
+                      tier: t(`tier.${x.difficulty}`),
+                    })}
                   </Meta>
                 </div>
                 <span
@@ -101,9 +111,7 @@ export default function Progress({ onBack }) {
             ))}
           </Card>
         ) : (
-          <Empty icon="🌱">
-            No sessions yet. Try one activity and the first reading will appear here.
-          </Empty>
+          <Empty icon="🌱">{t('progress.empty')}</Empty>
         )}
       </div>
     </Screen>

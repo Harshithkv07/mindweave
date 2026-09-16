@@ -1,18 +1,24 @@
 import Blob from './Blob'
+import { useT } from '../lib/i18n'
 import { Card } from './ui'
 import { Back } from './Icons'
 
 /* Shared furniture for the three activities. */
 
-export function GameTop({ onBack, title, tier }) {
+export function GameTop({ onBack, game, tier }) {
+  const { t } = useT()
   return (
-    <div className="flex items-center justify-between pt-3">
-      <button onClick={onBack} className="ring-btn text-ink" aria-label="Leave activity">
+    <div className="flex items-center gap-2 pt-3">
+      <button onClick={onBack} className="ring-btn shrink-0 text-ink" aria-label={t('play.leave')}>
         <Back size={21} />
       </button>
-      <span className="text-[15px] font-semibold text-ink-soft">{title}</span>
-      <span className="grid h-[46px] min-w-[46px] place-items-center rounded-full bg-white px-3 text-[12.5px] font-semibold text-mint-600 shadow-[0_6px_18px_-8px_rgba(26,78,88,0.4)]">
-        {tier}
+      {/* Centre column shrinks and wraps: translated game names run far longer
+          than the English, and this row has no spare width. */}
+      <span className="min-w-0 flex-1 text-center text-[15px] font-semibold leading-tight text-ink-soft">
+        {t(`gameName.${game}`)}
+      </span>
+      <span className="grid h-[46px] shrink-0 place-items-center rounded-full bg-white px-3.5 text-[12.5px] font-semibold text-mint-600 shadow-[0_6px_18px_-8px_rgba(26,78,88,0.4)]">
+        {t(`tier.${tier}`)}
       </span>
     </div>
   )
@@ -41,6 +47,7 @@ export function Prompt({ children, sub }) {
 }
 
 export function ResultSheet({ open, result, onAgain, onDone }) {
+  const { t } = useT()
   if (!open) return null
 
   const { accuracy, seconds, errors, difficulty } = result
@@ -59,32 +66,30 @@ export function ResultSheet({ open, result, onAgain, onDone }) {
         </div>
 
         <h2 className="display mt-4 text-[30px] text-ink">
-          {warm ? 'Beautifully done' : 'That was a good try'}
+          {warm ? t('play.wellDone') : t('play.goodTry')}
         </h2>
         <p className="mt-2 text-[14.5px] leading-relaxed text-ink-muted">
-          {warm
-            ? 'That sat comfortably above your usual pattern.'
-            : 'Every attempt counts — this one is saved too.'}
+          {warm ? t('play.wellDoneBody') : t('play.goodTryBody')}
         </p>
 
         <div className="mt-6 grid grid-cols-3 gap-3">
-          <Figure value={`${Math.round(accuracy)}%`} label="Accuracy" />
-          <Figure value={`${seconds}s`} label="Time" />
-          <Figure value={errors} label="Missteps" />
+          <Figure value={`${Math.round(accuracy)}%`} label={t('play.accuracy')} />
+          <Figure value={`${seconds}s`} label={t('play.time')} />
+          <Figure value={errors} label={t('play.missteps')} />
         </div>
 
         <p className="mt-4 text-[12.5px] font-medium text-ink-faint">
-          Played at {difficulty} · saved to your progress
+          {t('play.playedAt', { tier: t(`tier.${difficulty}`) })}
         </p>
 
         <button onClick={onAgain} className="pill-cta mt-7">
-          Play again
+          {t('play.again')}
         </button>
         <button
           onClick={onDone}
           className="mx-auto mt-3 block px-6 py-3 text-[15px] font-medium text-ink-soft"
         >
-          Finish for now
+          {t('play.finish')}
         </button>
       </div>
     </div>

@@ -1,0 +1,319 @@
+{
+  "common": {
+    "back": "Go back",
+    "skip": "Skip",
+    "cancel": "Cancel",
+    "clear": "Clear",
+    "done": "Done",
+    "saved": "Saved",
+    "today": "today",
+    "notDiagnosis": "A personal, longitudinal reading — not a diagnosis."
+  },
+
+  "welcome": {
+    "title": "Take a moment. You're in a calm space",
+    "body": "MindWeave helps you keep your days steady — gentle memory activities, the routines that matter, and a voice to walk you through them.",
+    "start": "Start your journey",
+    "card1": "What day is it today?",
+    "card1meta": "daily",
+    "card2": "Is it normal to feel tired even after resting?",
+    "card2meta": "14 answers",
+    "card3": "Small things, remembered together.",
+    "card3meta": "380 views",
+    "explore": "Explore",
+    "saved": "Saved"
+  },
+
+  "language": {
+    "title": "Choose your language",
+    "body": "This is used across the whole app, including everything read aloud.",
+    "continue": "Continue",
+    "change": "Change language",
+    "current": "Language"
+  },
+
+  "profile": {
+    "title": "Who's here today?",
+    "body": "Choose a space. Nothing is locked, and you can switch at any time.",
+    "patientSub": "Activities, routines and voice support",
+    "caretaker": "Caretaker",
+    "caretakerSub": "Adherence, trends and gentle alerts"
+  },
+
+  "home": {
+    "greetMorning": "Good morning",
+    "greetAfternoon": "Good afternoon",
+    "greetEvening": "Good evening",
+    "greetNight": "Good night",
+    "switchProfile": "Switch profile",
+    "moodPrompt": "How are you feeling now?",
+    "moodPromptFirst": "Tell me how you feel today",
+    "nextUp": "Next: {title} at {time}",
+    "nothingScheduled": "Nothing scheduled — a free day",
+    "statSessions": "Sessions",
+    "statBest": "Best",
+    "statBaseline": "Baseline",
+    "whatNext": "What would you like to do?",
+    "actionActivities": "Activities",
+    "actionActivitiesSub": "Memory & focus",
+    "actionVoice": "Voice",
+    "actionVoiceSub": "Talk me through it",
+    "actionRoutines": "Routines",
+    "actionRoutinesSub": {
+      "one": "{count} today",
+      "other": "{count} today"
+    },
+    "actionProgress": "Progress",
+    "actionProgressSub": "How I am doing",
+    "today": "Today",
+    "routineCount": {
+      "one": "{count} routine",
+      "other": "{count} routines"
+    },
+    "noRoutines": "No routines switched on yet.",
+    "streak": "<b>{count} days</b> in a row. That consistency is doing more than any single session.",
+    "markDone": "Mark {title} done",
+    "undoDone": "Undo {title}"
+  },
+
+  "mood": {
+    "title": "How are you feeling right now?",
+    "body": "Choose whichever fits best",
+    "save": "Save how I feel",
+    "breathe": "Breathe with me",
+    "companion": "Companion",
+    "checkIn": "Mood check-in",
+    "happy": "Happy",
+    "calm": "Calm",
+    "tired": "Tired",
+    "anxious": "Anxious",
+    "upset": "Upset",
+    "replyHappy": "That is lovely to hear. Let us keep the day gentle and steady.",
+    "replyCalm": "Calm is a good place to be. Nothing here is in a hurry.",
+    "replyTired": "Rest is allowed. Perhaps something short and easy today.",
+    "replyAnxious": "That feeling will pass. A slow breath together might help.",
+    "replyUpset": "Thank you for telling me. You do not have to carry it alone.",
+    "lookingLike": "Companion looking {mood}"
+  },
+
+  "games": {
+    "title": "Activities",
+    "subtitle": "Chosen to match how you have been doing",
+    "find": "Find an activity",
+    "note": "Difficulty moves on its own, based on your last few sessions. There is no score to chase and no way to fail.",
+    "notTried": "Not tried yet",
+    "playedCount": {
+      "one": "{count} session so far",
+      "other": "{count} sessions so far"
+    },
+    "matchQuestion": "Which two belong together?",
+    "matchBlurb": "Turn the cards over and find the pairs. Nothing disappears if you are slow.",
+    "matchDetail": {
+      "one": "{count} pair",
+      "other": "{count} pairs"
+    },
+    "objectsQuestion": "What did you just see?",
+    "objectsBlurb": "A handful of everyday objects appear, then you pick them out again.",
+    "objectsDetail": "{count} objects, {seconds}s",
+    "sequenceQuestion": "Can you follow the order?",
+    "sequenceBlurb": "Shapes light up one by one. Repeat the order back, and it grows a little.",
+    "sequenceDetail": "starts at {count}",
+    "tagMemory": "memory",
+    "tagPairs": "pairs",
+    "tagGentle": "gentle",
+    "tagRecall": "recall",
+    "tagAttention": "attention",
+    "tagEveryday": "everyday",
+    "tagSequence": "sequence",
+    "tagFocus": "focus",
+    "tagRhythm": "rhythm"
+  },
+
+  "gameName": {
+    "match": "Memory Match",
+    "objects": "Remember Objects",
+    "sequence": "Sequence Memory"
+  },
+
+  "tier": {
+    "Easy": "Easy",
+    "Medium": "Medium",
+    "Hard": "Hard"
+  },
+
+  "domain": {
+    "memory": "Memory",
+    "attention": "Attention & focus",
+    "pattern": "Pattern recognition",
+    "routine": "Routine & sequence"
+  },
+
+  "play": {
+    "leave": "Leave activity",
+    "wellDone": "Beautifully done",
+    "goodTry": "That was a good try",
+    "wellDoneBody": "That sat comfortably above your usual pattern.",
+    "goodTryBody": "Every attempt counts — this one is saved too.",
+    "accuracy": "Accuracy",
+    "time": "Time",
+    "missteps": "Missteps",
+    "playedAt": "Played at {tier} · saved to your progress",
+    "again": "Play again",
+    "finish": "Finish for now",
+
+    "matchPrompt": "Find the matching pairs",
+    "matchSub": "Take as long as you like — nothing is timed against you.",
+    "pairsFound": "Pairs found",
+    "turns": "Turns",
+    "hiddenCard": "Hidden card",
+
+    "objectsStudy": "Hold these in mind",
+    "objectsStudySub": {
+      "one": "These will fade in {count} second",
+      "other": "These will fade in {count} seconds"
+    },
+    "objectsRecall": "Which did you see?",
+    "objectsRecallSub": "Tap the ones you saw. Wrong taps are fine.",
+    "found": "Found",
+    "look": "Look",
+    "phase": "Phase",
+    "phaseRecall": "Recall",
+
+    "seqWatch": "Watch",
+    "seqYourTurn": "Your turn",
+    "seqWrong": "Close one",
+    "seqWatchSub": "Just watch — your turn comes next.",
+    "seqTurnSub": "Tap them back in the same order.",
+    "seqWrongSub": "That broke the run, and that is completely fine.",
+    "level": "Level",
+    "length": "Length",
+    "step": "Step",
+    "shape": "Shape {n}"
+  },
+
+  "object": {
+    "Apple": "Apple",
+    "Key": "Key",
+    "Umbrella": "Umbrella",
+    "Clock": "Clock",
+    "Glasses": "Glasses",
+    "Cup": "Cup",
+    "Book": "Book",
+    "Flower": "Flower",
+    "Chair": "Chair",
+    "Socks": "Socks",
+    "Bread": "Bread",
+    "Telephone": "Telephone"
+  },
+
+  "voice": {
+    "title": "Shall I talk you through it?",
+    "body": "Pick a moment below and I'll read it aloud, slowly.",
+    "label": "Voice",
+    "pace": "Pace",
+    "moments": "Moments",
+    "sayElse": "Say something else",
+    "customPlaceholder": "Type anything and I will read it out…",
+    "readAloud": "Read aloud",
+    "stop": "Stop",
+    "unsupported": "This device has no speech voice available, so the scripts are shown as text instead. They still work read on-screen.",
+    "missingTitle": "Voice for this language isn't installed",
+    "missingBody": "Your phone does not have a {language} voice yet. You can install it from Android's settings, or carry on and hear English instead.",
+    "installVoice": "Install voice data",
+    "useEnglish": "Use English for now",
+
+    "orientationTitle": "Morning orientation",
+    "orientationBlurb": "Grounds the day, the date and what comes next.",
+    "orientationScript": "Good morning {name}. Today is {date}. You are safe and you are at home. In a little while there will be breakfast, and then some gentle memory activities. There is nothing you need to worry about right now.",
+
+    "hydrationTitle": "Hydration prompt",
+    "hydrationBlurb": "A gentle nudge toward a glass of water.",
+    "hydrationScript": "{name}, this is a gentle reminder to have some water. A full glass now will help you feel clearer and more comfortable. Take your time, there is no rush.",
+
+    "medicationTitle": "Medication routine",
+    "medicationBlurb": "Walks through taking the scheduled dose.",
+    "medicationScript": "{name}, it is time for your scheduled medication. Find your pill box, take the dose for this time of day, and drink a full glass of water with it. When you have finished, you can mark it as taken.",
+
+    "encouragementTitle": "Before a memory game",
+    "encouragementBlurb": "Explains the activity and takes the pressure off.",
+    "encouragementScript": "{name}, you are about to do a short memory activity. There is no score to worry about and no way to fail. Simply look, take your time, and choose what feels right. Every attempt helps.",
+
+    "calmingTitle": "Calming breath",
+    "calmingBlurb": "A guided breath for restless moments.",
+    "calmingScript": "Let us take a moment together. Breathe in slowly through your nose, two, three, four. Hold gently, two, three. And breathe out slowly through your mouth, two, three, four, five. Again. In, two, three, four. Hold. And out, slowly. You are doing beautifully. Let your shoulders drop, and rest here as long as you like."
+  },
+
+  "progress": {
+    "title": "How you're doing",
+    "body": "Measured against your own pattern over time — never against anybody else.",
+    "label": "Progress",
+    "sessions": "Sessions",
+    "bestAccuracy": "Best accuracy",
+    "quickest": "Quickest round",
+    "missteps": "Missteps",
+    "trend": "Accuracy trend",
+    "recentCount": {
+      "one": "{count} recent",
+      "other": "{count} recent"
+    },
+    "domains": "Four domains",
+    "baselineAside": "baseline {value}%",
+    "recent": "Recent sessions",
+    "empty": "No sessions yet. Try one activity and the first reading will appear here.",
+    "sessionMeta": "{date} · {seconds}s · {errors} missteps · {tier}",
+    "chartEmpty": "Two or more sessions are needed before a trend can be drawn.",
+    "chartLabel": "Accuracy across recent sessions"
+  },
+
+  "insight": {
+    "tooFew": "Not enough activity yet. A few more sessions will establish a personal baseline.",
+    "early": "Early days. Keep sessions short and regular to build a reliable baseline.",
+    "down": "Recent sessions are running below the usual personal pattern. Easier activities and a check-in may help.",
+    "up": "Recent sessions are running above the usual personal pattern. Gradually increasing challenge looks appropriate.",
+    "steady": "Performance is broadly consistent with the recent personal pattern."
+  },
+
+  "reminders": {
+    "title": "Your routines",
+    "body": "The shape of the day. Switch off anything that no longer fits.",
+    "add": "Add routine",
+    "addTitle": "What is it?",
+    "time": "Time",
+    "kind": "Kind of routine",
+    "addConfirm": "Add routine",
+    "daily": "Daily",
+    "onOf": "{on} of {total} on",
+    "markDone": "Mark as done",
+    "doneToday": "Done today",
+    "switchedOff": "Switched off",
+    "remove": "Remove {title}",
+    "toggle": "{title} on or off",
+    "note": "Routines live on this device. Marking one done feeds the caretaker's adherence view for today."
+  },
+
+  "category": {
+    "medication": "Medication",
+    "hydration": "Hydration",
+    "cognitive": "Cognitive",
+    "activity": "Activity"
+  },
+
+  "seed": {
+    "morningMed": "Morning medication",
+    "water": "Glass of water",
+    "training": "Memory training",
+    "afternoonWater": "Afternoon hydration",
+    "walk": "Gentle walk or stretch",
+    "eveningMed": "Evening medication",
+    "breath": "Calming breath & check-in"
+  },
+
+  "nav": {
+    "main": "Main",
+    "home": "Home",
+    "activities": "Activities",
+    "voice": "Voice",
+    "progress": "Progress",
+    "routines": "Routines"
+  }
+}

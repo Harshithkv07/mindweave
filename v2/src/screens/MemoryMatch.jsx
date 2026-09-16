@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../lib/store'
+import { useT } from '../lib/i18n'
 import { matchConfig, shuffle } from '../lib/adaptive'
 import { Screen } from '../components/ui'
 import { GameTop, LiveStats, Prompt, ResultSheet } from '../components/GameChrome'
@@ -8,6 +9,7 @@ import { GameTop, LiveStats, Prompt, ResultSheet } from '../components/GameChrom
 
 export default function MemoryMatch({ onBack }) {
   const store = useStore()
+  const { t } = useT()
   const cfg = useMemo(() => matchConfig(store.sessions), []) // frozen for this round
 
   const [cards, setCards] = useState(() => deal(cfg))
@@ -84,19 +86,17 @@ export default function MemoryMatch({ onBack }) {
   return (
     <Screen>
       <div className="pb-12">
-        <GameTop onBack={onBack} title="Memory Match" tier={cfg.tier} />
+        <GameTop onBack={onBack} game="match" tier={cfg.tier} />
 
         <LiveStats
           items={[
-            { label: 'Pairs found', value: `${matched.length / 2}/${cfg.pairs}` },
-            { label: 'Turns', value: Math.floor(flips / 2) },
-            { label: 'Time', value: `${elapsed}s` },
+            { label: t('play.pairsFound'), value: `${matched.length / 2}/${cfg.pairs}` },
+            { label: t('play.turns'), value: Math.floor(flips / 2) },
+            { label: t('play.time'), value: `${elapsed}s` },
           ]}
         />
 
-        <Prompt sub="Take as long as you like — nothing is timed against you.">
-          Find the matching pairs
-        </Prompt>
+        <Prompt sub={t('play.matchSub')}>{t('play.matchPrompt')}</Prompt>
 
         <div
           className="mx-auto mt-7 grid gap-3.5"
@@ -112,7 +112,7 @@ export default function MemoryMatch({ onBack }) {
               <button
                 key={c.key}
                 onClick={() => tap(i)}
-                aria-label={face ? c.symbol : 'Hidden card'}
+                aria-label={face ? c.symbol : t('play.hiddenCard')}
                 className="relative aspect-square"
                 style={{ perspective: '900px' }}
               >

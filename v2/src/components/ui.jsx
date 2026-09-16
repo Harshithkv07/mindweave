@@ -1,4 +1,5 @@
 import { Back } from './Icons'
+import { useT } from '../lib/i18n'
 
 /* ==========================================================================
    Shared surfaces and controls.
@@ -20,10 +21,12 @@ export function Screen({ children, wash = 'wash', pad = true, className = '' }) 
 }
 
 export function TopBar({ onBack, right, title }) {
+  const { t } = useT()
+
   return (
     <div className="flex items-center justify-between pt-2 pb-1">
       {onBack ? (
-        <button onClick={onBack} className="ring-btn text-ink" aria-label="Go back">
+        <button onClick={onBack} className="ring-btn text-ink" aria-label={t('common.back')}>
           <Back size={21} />
         </button>
       ) : (
@@ -158,6 +161,23 @@ export function Waveform({ active = false, bars = 26 }) {
 
 export function Tag({ children }) {
   return <span className="tag">{children}</span>
+}
+
+/* Renders a translated string that carries one <b>…</b> span.
+
+   The alternative was splicing a bolded count into JSX around the text, which
+   leaves translators with sentence fragments and no way to move the emphasis —
+   and word order genuinely differs across the four languages here. */
+export function Rich({ text, className = '' }) {
+  const m = /^(.*?)<b>(.*?)<\/b>(.*)$/s.exec(text)
+  if (!m) return <span className={className}>{text}</span>
+  return (
+    <span className={className}>
+      {m[1]}
+      <b className="font-semibold text-ink">{m[2]}</b>
+      {m[3]}
+    </span>
+  )
 }
 
 /* `tone="light"` for sections sitting on a saturated wash, where the default

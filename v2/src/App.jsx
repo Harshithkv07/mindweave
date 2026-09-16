@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
 import { StoreProvider, useStore } from './lib/store'
+import { LanguageProvider } from './lib/i18n'
 import BottomNav from './components/BottomNav'
 
 import Welcome from './screens/Welcome'
+import LanguageSelect from './screens/LanguageSelect'
 import ProfileSelect from './screens/ProfileSelect'
 import Home from './screens/Home'
 import MoodCheck from './screens/MoodCheck'
@@ -91,6 +93,7 @@ function Shell() {
   const go = (id) => {
     if (id === 'mood') return push('mood')
     if (id === 'reminders') return push('reminders')
+    if (id === 'changeLanguage') return push('changeLanguage')
     return tab(id)
   }
 
@@ -99,16 +102,27 @@ function Shell() {
       case 'welcome':
         return (
           <Welcome
-            onStart={() => {
-              store.finishOnboarding()
-              reset('profile')
-            }}
+            onStart={() => reset('language')}
             onSkip={() => {
               store.finishOnboarding()
               reset('profile')
             }}
           />
         )
+
+      case 'language':
+        return (
+          <LanguageSelect
+            onContinue={() => {
+              store.finishOnboarding()
+              reset('profile')
+            }}
+          />
+        )
+
+      /* Reached from the home screen, so it pops back instead of continuing. */
+      case 'changeLanguage':
+        return <LanguageSelect onBack={pop} onContinue={pop} />
 
       case 'profile':
         return (
@@ -190,8 +204,10 @@ function Shell() {
 
 export default function App() {
   return (
-    <StoreProvider>
-      <Shell />
-    </StoreProvider>
+    <LanguageProvider>
+      <StoreProvider>
+        <Shell />
+      </StoreProvider>
+    </LanguageProvider>
   )
 }

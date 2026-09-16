@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../lib/store'
+import { useT } from '../lib/i18n'
 import { sequenceConfig, SYMBOLS } from '../lib/adaptive'
 import { Screen } from '../components/ui'
 import { GameTop, LiveStats, Prompt, ResultSheet } from '../components/GameChrome'
@@ -8,6 +9,7 @@ import { GameTop, LiveStats, Prompt, ResultSheet } from '../components/GameChrom
 
 export default function SequenceMemory({ onBack }) {
   const store = useStore()
+  const { t } = useT()
   const cfg = useMemo(() => sequenceConfig(store.sessions), [])
   const pool = useMemo(() => SYMBOLS.slice(0, cfg.pool), [cfg.pool])
 
@@ -106,28 +108,32 @@ export default function SequenceMemory({ onBack }) {
     setPhase('watch')
   }
 
-  const label = { watch: 'Watch', repeat: 'Your turn', wrong: 'Close one' }[phase]
+  const label = {
+    watch: t('play.seqWatch'),
+    repeat: t('play.seqYourTurn'),
+    wrong: t('play.seqWrong'),
+  }[phase]
 
   return (
     <Screen>
       <div className="pb-12">
-        <GameTop onBack={onBack} title="Sequence Memory" tier={cfg.tier} />
+        <GameTop onBack={onBack} game="sequence" tier={cfg.tier} />
 
         <LiveStats
           items={[
-            { label: 'Level', value: level },
-            { label: 'Length', value: sequence.length },
-            { label: 'Step', value: phase === 'repeat' ? `${step}/${sequence.length}` : '—' },
+            { label: t('play.level'), value: level },
+            { label: t('play.length'), value: sequence.length },
+            { label: t('play.step'), value: phase === 'repeat' ? `${step}/${sequence.length}` : '—' },
           ]}
         />
 
         <Prompt
           sub={
             phase === 'watch'
-              ? 'Just watch — your turn comes next.'
+              ? t('play.seqWatchSub')
               : phase === 'repeat'
-                ? 'Tap them back in the same order.'
-                : 'That broke the run, and that is completely fine.'
+                ? t('play.seqTurnSub')
+                : t('play.seqWrongSub')
           }
         >
           {label}
@@ -159,7 +165,7 @@ export default function SequenceMemory({ onBack }) {
                 key={sym}
                 onClick={() => tap(i)}
                 disabled={phase !== 'repeat'}
-                aria-label={`Shape ${i + 1}`}
+                aria-label={t('play.shape', { n: i + 1 })}
                 className={`grid aspect-square place-items-center rounded-[26px] transition-all duration-200 ${
                   on
                     ? 'scale-[1.06] border border-sky-300 bg-white shadow-[0_0_0_6px_rgba(98,191,230,0.25),0_16px_34px_-16px_rgba(26,78,88,0.7)]'

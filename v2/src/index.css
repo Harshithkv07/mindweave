@@ -52,6 +52,60 @@
     U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
+/* --- Indic scripts -------------------------------------------------------
+   No unicode-range here: these are selected wholesale per language by the
+   :lang() rules below, not by codepoint. Noto Serif keeps the editorial
+   display voice intact in Tamil, Hindi and Telugu instead of dropping to a
+   system sans. --------------------------------------------------------- */
+
+@font-face {
+  font-family: "Noto Sans Devanagari";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("/fonts/noto-sans-devanagari.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Noto Serif Devanagari";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("/fonts/noto-serif-devanagari.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Noto Sans Tamil";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("/fonts/noto-sans-tamil.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Noto Serif Tamil";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("/fonts/noto-serif-tamil.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Noto Sans Telugu";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("/fonts/noto-sans-telugu.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Noto Serif Telugu";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("/fonts/noto-serif-telugu.woff2") format("woff2");
+}
+
 /* ==========================================================================
    MindWeave v2 — design tokens
    Calm mint→sky wash, frosted glass, serif display, fully-rounded geometry.
@@ -98,6 +152,46 @@
 /* --------------------------------------------------------------------------
    Base
    -------------------------------------------------------------------------- */
+
+/* --------------------------------------------------------------------------
+   Per-language typography.
+
+   LanguageProvider sets <html lang>, and these swap the two font tokens for
+   that script. Every `font-sans` / `.display` usage in the app is untouched.
+   `:root:lang(x)` outranks the `:root` that @theme emits, so no !important.
+   -------------------------------------------------------------------------- */
+
+:root:lang(hi) {
+  --font-sans: "Noto Sans Devanagari", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Noto Serif Devanagari", "Instrument Serif", ui-serif, Georgia, serif;
+}
+
+:root:lang(ta) {
+  --font-sans: "Noto Sans Tamil", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Noto Serif Tamil", "Instrument Serif", ui-serif, Georgia, serif;
+}
+
+:root:lang(te) {
+  --font-sans: "Noto Sans Telugu", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Noto Serif Telugu", "Instrument Serif", ui-serif, Georgia, serif;
+}
+
+/* Indic scripts are uncased, and positive letter-spacing breaks their
+   shaping — so the small-caps label treatment is Latin-only. */
+:root:lang(hi) .label-caps,
+:root:lang(ta) .label-caps,
+:root:lang(te) .label-caps {
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* Devanagari, Tamil and Telugu need more vertical room than Latin at the
+   same size, or ascenders and matras clip against tight line boxes. */
+:root:lang(hi) .display,
+:root:lang(ta) .display,
+:root:lang(te) .display {
+  line-height: 1.32;
+}
 
 @layer base {
   * {
@@ -267,6 +361,12 @@
     color: var(--color-sky-700);
     font-weight: 600;
     box-shadow: 0 8px 20px -10px rgba(56, 163, 224, 0.7);
+  }
+
+  /* Small uppercase label. Neutralised for Indic scripts above. */
+  .label-caps {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
   }
 
   /* Display type — the serif that carries every hero line. */

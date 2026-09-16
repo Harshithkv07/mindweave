@@ -1,11 +1,15 @@
 import { useId } from 'react'
+import { useT } from '../lib/i18n'
+import { formatDate } from '../lib/i18n/locales'
 
 /* ==========================================================================
    Accuracy trend — hand-drawn SVG so it inherits the glass palette exactly
    and stays legible at senior-friendly type sizes.
    ========================================================================== */
 
-export default function TrendChart({ sessions, height = 190 }) {
+export default function TrendChart({ sessions, height = 190, lang }) {
+  const { language, t } = useT()
+  const loc = lang ?? language
   const gid = useId().replace(/:/g, '')
   const points = sessions.slice(0, 7).reverse()
 
@@ -13,7 +17,7 @@ export default function TrendChart({ sessions, height = 190 }) {
     return (
       <div className="grid h-[190px] place-items-center rounded-[22px] bg-white/45 text-center">
         <p className="px-8 text-[14.5px] leading-relaxed text-ink-muted">
-          Two or more sessions are needed before a trend can be drawn.
+          {t('progress.chartEmpty')}
         </p>
       </div>
     )
@@ -35,7 +39,7 @@ export default function TrendChart({ sessions, height = 190 }) {
   const baselineY = y(75)
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label="Accuracy across recent sessions">
+    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label={t('progress.chartLabel')}>
       <defs>
         <linearGradient id={`fill-${gid}`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#3dbe8b" stopOpacity="0.30" />
@@ -91,7 +95,7 @@ export default function TrendChart({ sessions, height = 190 }) {
             fill="#a8b1b9"
             fontWeight="500"
           >
-            {new Date(p.at).toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}
+            {formatDate(p.at, loc)}
           </text>
         </g>
       ))}

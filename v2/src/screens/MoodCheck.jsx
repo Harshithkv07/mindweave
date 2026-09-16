@@ -1,19 +1,13 @@
 import { useState } from 'react'
 import Blob, { MOODS } from '../components/Blob'
+import { useT } from '../lib/i18n'
 import { Screen, TopBar, RingButton, Display, Muted, Waveform } from '../components/ui'
 import { Compass } from '../components/Icons'
 
 /* "How are you feeling right now?" — the emotional check-in. */
 
-const RESPONSE = {
-  happy: 'That is lovely to hear. Let us keep the day gentle and steady.',
-  calm: 'Calm is a good place to be. Nothing here is in a hurry.',
-  tired: 'Rest is allowed. Perhaps something short and easy today.',
-  anxious: 'That feeling will pass. A slow breath together might help.',
-  upset: 'Thank you for telling me. You do not have to carry it alone.',
-}
-
 export default function MoodCheck({ onBack, onLog, onCalm }) {
+  const { t } = useT()
   const [mood, setMood] = useState(null)
 
   const commit = () => {
@@ -29,23 +23,23 @@ export default function MoodCheck({ onBack, onLog, onCalm }) {
         <TopBar
           onBack={onBack}
           right={
-            <RingButton tone="sky" label="Companion">
+            <RingButton tone="sky" label={t('mood.companion')}>
               <Compass size={21} />
             </RingButton>
           }
         />
 
         <div className="mt-6 flex justify-center fade">
-          <Blob mood={mood ?? 'calm'} size={280} />
+          <Blob
+            mood={mood ?? 'calm'}
+            size={280}
+            label={t('mood.lookingLike', { mood: t(`mood.${mood ?? 'calm'}`) })}
+          />
         </div>
 
         <div className="mt-7 text-center rise">
-          <Display className="text-[34px]">
-            How are you
-            <br />
-            feeling right now?
-          </Display>
-          <Muted className="mt-3">Choose whichever fits best</Muted>
+          <Display className="text-[34px]">{t('mood.title')}</Display>
+          <Muted className="mt-3">{t('mood.body')}</Muted>
         </div>
 
         <div className="mt-5">
@@ -54,7 +48,7 @@ export default function MoodCheck({ onBack, onLog, onCalm }) {
 
         {mood ? (
           <p className="mt-1 px-4 text-center text-[15px] leading-relaxed text-ink-soft fade">
-            {RESPONSE[mood]}
+            {t(`mood.reply${mood[0].toUpperCase()}${mood.slice(1)}`)}
           </p>
         ) : null}
 
@@ -62,18 +56,18 @@ export default function MoodCheck({ onBack, onLog, onCalm }) {
           <div className="flex gap-3">
             {MOODS.map((m) => (
               <button
-                key={m.id}
-                onClick={() => setMood(m.id)}
-                className={`chip ${mood === m.id ? 'chip-on' : ''}`}
+                key={m}
+                onClick={() => setMood(m)}
+                className={`chip ${mood === m ? 'chip-on' : ''}`}
               >
-                {m.label}
+                {t(`mood.${m}`)}
               </button>
             ))}
           </div>
         </div>
 
         <button onClick={commit} disabled={!mood} className="pill-cta mt-6">
-          {mood === 'anxious' || mood === 'upset' ? 'Breathe with me' : 'Save how I feel'}
+          {mood === 'anxious' || mood === 'upset' ? t('mood.breathe') : t('mood.save')}
         </button>
       </div>
     </Screen>

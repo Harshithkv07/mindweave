@@ -1,19 +1,20 @@
 import Blob from '../components/Blob'
+import { useT } from '../lib/i18n'
 import { Screen, Display, Muted, Card, Tappable } from '../components/ui'
 import { User, Shield } from '../components/Icons'
 
 /* Two tiles, no password. The first decision is a picture, not a credential. */
 
 export default function ProfileSelect({ onPatient, onCaretaker, name }) {
+  const { t } = useT()
+
   return (
     <Screen>
       <div className="flex min-h-[100dvh] flex-col justify-center pb-10">
         <div className="mb-8 flex flex-col items-center text-center rise">
           <Blob mood="calm" size={140} />
-          <Display className="mt-5 text-[34px]">Who&rsquo;s here today?</Display>
-          <Muted className="mt-3 max-w-[300px]">
-            Choose a space. Nothing is locked, and you can switch at any time.
-          </Muted>
+          <Display className="mt-5 text-[34px]">{t('profile.title')}</Display>
+          <Muted className="mt-3 max-w-[300px]">{t('profile.body')}</Muted>
         </div>
 
         <div className="space-y-4">
@@ -27,7 +28,7 @@ export default function ProfileSelect({ onPatient, onCaretaker, name }) {
                   {name}
                 </span>
                 <span className="mt-1 block text-[14.5px] text-ink-muted">
-                  Activities, routines and voice support
+                  {t('profile.patientSub')}
                 </span>
               </span>
             </Card>
@@ -40,10 +41,10 @@ export default function ProfileSelect({ onPatient, onCaretaker, name }) {
               </span>
               <span className="min-w-0">
                 <span className="block text-[21px] font-semibold tracking-[-0.01em] text-ink">
-                  Caretaker
+                  {t('profile.caretaker')}
                 </span>
                 <span className="mt-1 block text-[14.5px] text-ink-muted">
-                  Adherence, trends and gentle alerts
+                  {t('profile.caretakerSub')}
                 </span>
               </span>
             </Card>

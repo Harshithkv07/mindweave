@@ -8,17 +8,32 @@ const KEY = 'mindweave.v2'
 
 const todayKey = () => new Date().toISOString().slice(0, 10)
 
+/* Seeded routines carry a `titleKey` as well as an English `title`. The key is
+   what gets rendered, so switching language renames them; the literal title is
+   kept as the fallback and for anything reading storage directly. Reminders the
+   user creates have no key and keep their own wording, which is correct. */
 function seedReminders() {
   const t = Date.now()
   return [
-    { id: 'r1', title: 'Morning medication', time: '08:30', category: 'medication', on: true, created: t },
-    { id: 'r2', title: 'Glass of water', time: '10:00', category: 'hydration', on: true, created: t },
-    { id: 'r3', title: 'Memory training', time: '10:30', category: 'cognitive', on: true, created: t },
-    { id: 'r4', title: 'Afternoon hydration', time: '14:00', category: 'hydration', on: true, created: t },
-    { id: 'r5', title: 'Gentle walk or stretch', time: '18:00', category: 'activity', on: true, created: t },
-    { id: 'r6', title: 'Evening medication', time: '20:00', category: 'medication', on: true, created: t },
-    { id: 'r7', title: 'Calming breath & check-in', time: '20:30', category: 'activity', on: true, created: t },
+    { id: 'r1', titleKey: 'seed.morningMed', title: 'Morning medication', time: '08:30', category: 'medication', on: true, created: t },
+    { id: 'r2', titleKey: 'seed.water', title: 'Glass of water', time: '10:00', category: 'hydration', on: true, created: t },
+    { id: 'r3', titleKey: 'seed.training', title: 'Memory training', time: '10:30', category: 'cognitive', on: true, created: t },
+    { id: 'r4', titleKey: 'seed.afternoonWater', title: 'Afternoon hydration', time: '14:00', category: 'hydration', on: true, created: t },
+    { id: 'r5', titleKey: 'seed.walk', title: 'Gentle walk or stretch', time: '18:00', category: 'activity', on: true, created: t },
+    { id: 'r6', titleKey: 'seed.eveningMed', title: 'Evening medication', time: '20:00', category: 'medication', on: true, created: t },
+    { id: 'r7', titleKey: 'seed.breath', title: 'Calming breath & check-in', time: '20:30', category: 'activity', on: true, created: t },
   ]
+}
+
+/* Installs seeded before titleKey existed still hold plain English titles.
+   Match them back up by id so an upgrade starts translating too. */
+const SEED_KEYS = {
+  r1: 'seed.morningMed', r2: 'seed.water', r3: 'seed.training', r4: 'seed.afternoonWater',
+  r5: 'seed.walk', r6: 'seed.eveningMed', r7: 'seed.breath',
+}
+
+function migrateReminders(reminders) {
+  return reminders.map((r) => (r.titleKey || !SEED_KEYS[r.id] ? r : { ...r, titleKey: SEED_KEYS[r.id] }))
 }
 
 function blank() {
@@ -38,7 +53,9 @@ function load() {
   try {
     const raw = localStorage.getItem(KEY)
     if (!raw) return blank()
-    return { ...blank(), ...JSON.parse(raw) }
+    const saved = { ...blank(), ...JSON.parse(raw) }
+    saved.reminders = migrateReminders(saved.reminders)
+    return saved
   } catch {
     return blank()
   }

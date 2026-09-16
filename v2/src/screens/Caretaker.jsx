@@ -1,13 +1,20 @@
 import { useState } from 'react'
 import { useStore, GAME_LABEL, DOMAIN_LABEL } from '../lib/store'
-import { insight, attentionAlerts } from '../lib/adaptive'
+import { insightKey, attentionAlerts } from '../lib/adaptive'
+import en from '../lib/i18n/en.json'
 import TrendChart from '../components/TrendChart'
 import {
   Screen, Card, Meter, SectionTitle, Meta, Muted, Toggle,
 } from '../components/ui'
 import { Back, Bell, Drop, Pill, Plus, Undo, Spark, Check } from '../components/Icons'
 
-/* The caretaker side: adherence, trend, alerts, session log. */
+/* The caretaker side: adherence, trend, alerts, session log.
+
+   Deliberately English-only — the caregiver or clinician reading this is not
+   assumed to share the patient's language. So it reads the English catalog
+   directly rather than going through useT(). */
+
+const enText = (key) => key.split('.').reduce((n, k) => n?.[k], en) ?? key
 
 const FILTERS = [
   { id: 'all', label: 'All' },
@@ -60,7 +67,9 @@ export default function Caretaker({ onBack }) {
             <Spark size={21} />
           </span>
           <div>
-            <p className="text-[15.5px] leading-[1.55] text-ink-soft">{insight(s.sessions)}</p>
+            <p className="text-[15.5px] leading-[1.55] text-ink-soft">
+              {enText(insightKey(s.sessions))}
+            </p>
             <p className="mt-2 text-[12px] text-ink-faint">
               Personal and longitudinal. Not a diagnosis.
             </p>
@@ -200,7 +209,7 @@ export default function Caretaker({ onBack }) {
             ))}
           </div>
 
-          <TrendChart sessions={filtered} />
+          <TrendChart sessions={filtered} lang="en" />
 
           <div className="mt-3 flex items-center justify-center gap-5 text-[12px] text-ink-muted">
             <span className="flex items-center gap-1.5">

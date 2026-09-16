@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useStore } from '../lib/store'
+import { useT } from '../lib/i18n'
 import { objectsConfig, shuffle, OBJECTS } from '../lib/adaptive'
 import { Screen, Card } from '../components/ui'
 import { GameTop, LiveStats, Prompt, ResultSheet } from '../components/GameChrome'
@@ -8,6 +9,7 @@ import { GameTop, LiveStats, Prompt, ResultSheet } from '../components/GameChrom
 
 export default function RememberObjects({ onBack }) {
   const store = useStore()
+  const { t } = useT()
   const cfg = useMemo(() => objectsConfig(store.sessions), [])
 
   const [round, setRound] = useState(() => build(cfg))
@@ -64,20 +66,23 @@ export default function RememberObjects({ onBack }) {
   return (
     <Screen>
       <div className="pb-12">
-        <GameTop onBack={onBack} title="Remember Objects" tier={cfg.tier} />
+        <GameTop onBack={onBack} game="objects" tier={cfg.tier} />
 
         <LiveStats
           items={[
-            { label: 'Found', value: `${correctPicks.length}/${cfg.remember}` },
-            { label: 'Missteps', value: wrong.length },
-            { label: phase === 'study' ? 'Look' : 'Phase', value: phase === 'study' ? `${countdown}s` : 'Recall' },
+            { label: t('play.found'), value: `${correctPicks.length}/${cfg.remember}` },
+            { label: t('play.missteps'), value: wrong.length },
+            {
+              label: phase === 'study' ? t('play.look') : t('play.phase'),
+              value: phase === 'study' ? `${countdown}s` : t('play.phaseRecall'),
+            },
           ]}
         />
 
         {phase === 'study' ? (
           <>
-            <Prompt sub={`These will fade in ${countdown} second${countdown === 1 ? '' : 's'}`}>
-              Hold these in mind
+            <Prompt sub={t('play.objectsStudySub', { count: countdown })}>
+              {t('play.objectsStudy')}
             </Prompt>
 
             <div className="mt-8 flex flex-wrap justify-center gap-4">
@@ -85,11 +90,13 @@ export default function RememberObjects({ onBack }) {
                 <Card
                   key={o.name}
                   variant="glass-solid"
-                  className="grid h-[112px] w-[112px] place-items-center pop"
+                  className="grid min-h-[112px] w-[112px] place-items-center px-1 py-2 pop"
                   style={{ animationDelay: `${i * 90}ms` }}
                 >
                   <span className="text-[44px] leading-none">{o.icon}</span>
-                  <span className="mt-1 text-[12.5px] font-medium text-ink-muted">{o.name}</span>
+                  <span className="mt-1 px-1 text-center text-[12.5px] font-medium leading-tight text-ink-muted">
+                    {t(`object.${o.name}`)}
+                  </span>
                 </Card>
               ))}
             </div>
@@ -103,9 +110,7 @@ export default function RememberObjects({ onBack }) {
           </>
         ) : (
           <>
-            <Prompt sub="Tap the ones you saw. Wrong taps are fine.">
-              Which did you see?
-            </Prompt>
+            <Prompt sub={t('play.objectsRecallSub')}>{t('play.objectsRecall')}</Prompt>
 
             <div className="mt-7 grid grid-cols-3 gap-3.5">
               {round.options.map((o) => {
@@ -121,12 +126,12 @@ export default function RememberObjects({ onBack }) {
                     key={o.name}
                     onClick={() => pick(o)}
                     disabled={chosen}
-                    aria-label={o.name}
+                    aria-label={t(`object.${o.name}`)}
                     className={`grid aspect-square place-items-center rounded-[24px] transition-all duration-300 active:scale-95 ${tone}`}
                   >
                     <span className="text-[34px] leading-none">{o.icon}</span>
-                    <span className="mt-1 px-1 text-center text-[11.5px] font-medium text-ink-muted">
-                      {o.name}
+                    <span className="mt-1 px-1 text-center text-[11.5px] font-medium leading-tight text-ink-muted">
+                      {t(`object.${o.name}`)}
                     </span>
                   </button>
                 )

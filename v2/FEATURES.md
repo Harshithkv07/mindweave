@@ -207,3 +207,67 @@ only the feature inventory above.
 Memory Match accuracy is now `√(pairs / turns) × 100` rather than a flat
 `pairs / turns`. The flat ratio scored an ordinary trial-and-error round in the
 single digits, which contradicts the app's "no way to fail" framing.
+
+---
+
+# Voice + multilingual (added after the first APK)
+
+## Why voice was broken
+
+The first APK shipped with `window.speechSynthesis`. **Android WebView does not
+implement Web Speech synthesis** ([crbug.com/487255](https://issues.chromium.org/issues/40417848)),
+so every voice feature was dead inside the APK while working perfectly in a
+desktop browser — which is exactly why it passed testing.
+
+Replaced with `@capacitor-community/text-to-speech` (MIT) on native, keeping the
+Web Speech path for `npm run dev`. Both sit behind one API in `src/lib/speech.js`.
+
+Three things that needed care:
+- **`stop()` drops the plugin's pending callbacks**, so an awaited `speak()`
+  never settles after a cancel. A generation token discards stale completions.
+- **A `<queries>` entry for `TTS_SERVICE` is mandatory** on Android 11+. Without
+  it the app cannot see the TTS engine at all and both `isLanguageSupported()`
+  and `openInstall()` fail *silently*.
+- **Rate is on the same 1.0-is-normal scale** for both engines, since the plugin
+  passes `rate` straight to Android's `setSpeechRate()`. No conversion needed.
+
+## Missing voice data
+
+Tamil and Telugu voices are often not installed on Android. Before speaking, the
+app checks `isLanguageSupported()` and, if absent, offers either the system
+installer (`openInstall()`) or an English fallback — rather than silence.
+
+## Multilingual — English, Tamil, Hindi, Telugu
+
+- **235 keys per language**, hand-rolled runtime in `src/lib/i18n/`. No i18n
+  library: catalogs are small, `Intl.PluralRules` is already in the WebView, and
+  it must work fully offline.
+- **Ids stay English, labels are looked up.** Difficulty tiers, mood ids, game
+  ids and domain keys are persisted in localStorage, so translating them in
+  place would break both lookups and historical data.
+- **Seeded routines carry a `titleKey`**, so they rename with the language.
+  Older installs are migrated by id. User-created routines keep their own words.
+- **Sentences are whole units.** The bolded-count streak line and the Games
+  detail line were assembled from fragments; both are now single catalog entries
+  (see the `<Rich>` helper in `components/ui.jsx`).
+- **Caretaker screen stays English** by design and reads `en.json` directly.
+
+## Fonts
+
+Noto Sans + Noto Serif for Devanagari, Tamil and Telugu, bundled locally
+(+~575 KB; APK went 5.5 → 6.1 MB). Swapped per language by `:root:lang()`
+overriding the Tailwind `--font-sans` / `--font-display` tokens, so no component
+changed. Keeps the serif display voice in every language.
+
+Also fixed while here: fixed card heights became minimums (translated labels
+clipped), `uppercase`/`letter-spacing` is now Latin-only (it breaks Indic
+shaping), and pinch-zoom is re-enabled — it was disabled, which is poor for a
+senior-facing app rendering dense Indic glyphs at 12px.
+
+## ⚠️ Translation review
+
+The ~30 strings carried over from the v1 Flutter prototype are human-written.
+**The remaining ~205 × 3 languages are machine-written and have not been
+reviewed by a native speaker.** The medication and hydration scripts, and the
+"not a diagnosis" disclaimers, should be checked before this goes in front of
+real patients.

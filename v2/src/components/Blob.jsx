@@ -25,7 +25,7 @@ const EYE = {
   tired: { rx: 15, ry: 5, y: 152 },
 }
 
-export default function Blob({ mood = 'happy', size = 260, drift = true, className = '' }) {
+export default function Blob({ mood = 'happy', size = 260, drift = true, className = '', label }) {
   const eye = EYE[mood] ?? EYE.happy
   const mouth = MOUTH[mood] ?? MOUTH.happy
   const id = `blob-${mood}`
@@ -37,7 +37,7 @@ export default function Blob({ mood = 'happy', size = 260, drift = true, classNa
       height={size * (300 / 352)}
       className={`${drift ? 'drift' : ''} ${className}`}
       role="img"
-      aria-label={`Companion looking ${mood}`}
+      aria-label={label ?? `Companion looking ${mood}`}
     >
       <defs>
         <linearGradient id={id} x1="0" y1="0" x2="0.35" y2="1">
@@ -73,10 +73,6 @@ export default function Blob({ mood = 'happy', size = 260, drift = true, classNa
   )
 }
 
-export const MOODS = [
-  { id: 'happy', label: 'Happy' },
-  { id: 'calm', label: 'Calm' },
-  { id: 'tired', label: 'Tired' },
-  { id: 'anxious', label: 'Anxious' },
-  { id: 'upset', label: 'Upset' },
-]
+/* Ids only — labels live in the catalogs under `mood.*`. The id is also what
+   gets persisted, so it must stay stable across languages. */
+export const MOODS = ['happy', 'calm', 'tired', 'anxious', 'upset']
