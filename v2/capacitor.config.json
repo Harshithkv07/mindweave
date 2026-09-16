@@ -1,0 +1,11 @@
+{
+  "appId": "com.mindweave.app",
+  "appName": "MindWeave",
+  "webDir": "dist",
+  "android": {
+    "backgroundColor": "#D9F0E9"
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}

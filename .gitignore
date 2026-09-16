@@ -1,14 +1,43 @@
+# ---------------------------------------------------------------------------
+# Dependencies
+# ---------------------------------------------------------------------------
+node_modules/
+.venv/
+venv/
 __pycache__/
 *.pyc
-.venv/
-.env
-mindweave.db
-node_modules/
+
+# ---------------------------------------------------------------------------
+# Build output
+# ---------------------------------------------------------------------------
 dist/
-.dart_tool/
 build/
+.dart_tool/
+.gradle/
+*.apk
+*.aab
+
+# Capacitor copies the web build in here on every `cap sync`
+v2/android/app/src/main/assets/public/
+v2/android/app/src/main/assets/capacitor.config.json
+v2/android/capacitor-cordova-android-plugins/
+
+# ---------------------------------------------------------------------------
+# Machine-specific / secrets
+# ---------------------------------------------------------------------------
+local.properties
+.env
+*.keystore
+*.jks
+mindweave.db
 *.log
-.DS_Store
+
+# ---------------------------------------------------------------------------
+# Editor and OS cruft
+# ---------------------------------------------------------------------------
 .idea/
 .vscode/
-.flutter-plugins-dependencies
+*.iml
+.DS_Store
+DS_Store
+Thumbs.db
