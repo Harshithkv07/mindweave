@@ -148,5 +148,22 @@ void main() {
       expect(provider.progress['gamesCompleted'], equals(provider.sessions.length));
       expect(provider.progress['bestAccuracy'], greaterThanOrEqualTo(95.0));
     });
+
+    test('Caretaker dashboard analytics queries sessions and computes metrics', () async {
+      final sessions = StorageService.getAllSessions();
+      expect(sessions.isNotEmpty, isTrue);
+
+      final totalAccuracy = sessions.fold<double>(0.0, (sum, s) => sum + s.accuracy);
+      final avgAccuracy = totalAccuracy / sessions.length;
+      expect(avgAccuracy, greaterThan(0.0));
+
+      final profile = StorageService.getProfile();
+      expect(profile, isNotNull);
+      expect(profile!.baselineScore, greaterThan(0.0));
+      expect(profile.memoryScore, greaterThan(0.0));
+      expect(profile.attentionScore, greaterThan(0.0));
+      expect(profile.patternScore, greaterThan(0.0));
+      expect(profile.routineScore, greaterThan(0.0));
+    });
   });
 }

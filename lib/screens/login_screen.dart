@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
+import 'caretaker_dashboard.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -111,10 +112,8 @@ class _LoginScreenState extends State<LoginScreen> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => HomeScreen(
-          name: 'Caregiver (${email.split("@").first})',
-          language: selectedLanguage,
-          isCaretaker: true,
+        builder: (context) => const CaretakerDashboardScreen(
+          patientName: 'Margaret',
         ),
       ),
     );
@@ -389,7 +388,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
-                      value: selectedLanguage,
+                      initialValue: selectedLanguage,
                       decoration: InputDecoration(
                         labelText: 'Preferred Language for Voice Alerts',
                         prefixIcon: const Icon(

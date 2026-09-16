@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+import '../core/theme.dart';
 import 'games_screen.dart';
 import 'voice_screen.dart';
-import 'progress_screen.dart';
 import 'login_screen.dart';
 
+/// Redesigned Patient Dashboard optimized for maximum simplicity.
+///
+/// Features:
+/// - 2x2 oversized grid layout utilizing Flutter's GridView.
+/// - Distinct, large cards for 'Memory Games', 'Medication', 'Hydration', and 'Voice Assistant'.
+/// - Massive, universally understood icons (72dp) and single bold text labels (22sp).
+/// - Completely uncluttered design eliminating all decorative distractions to reduce cognitive load.
 class HomeScreen extends StatefulWidget {
   final String name;
   final String language;
@@ -21,69 +29,255 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  bool isSpeakingReminder = false;
-  String currentReminderText =
-      'Good morning Margaret. Remember to take your morning blood pressure medication with water.';
+  FlutterTts? _tts;
+  bool _isSpeaking = false;
 
-  String getGreeting() {
-    final hour = DateTime.now().hour;
-
-    if (hour >= 5 && hour < 12) {
-      return 'Good Morning 🌅';
-    } else if (hour >= 12 && hour < 17) {
-      return 'Good Afternoon ☀️';
-    } else if (hour >= 17 && hour < 21) {
-      return 'Good Evening 🌆';
-    } else {
-      return 'Good Night 🌙';
-    }
+  @override
+  void initState() {
+    super.initState();
+    _initTts();
   }
 
-  void _simulateVoiceReminder() {
-    setState(() {
-      isSpeakingReminder = true;
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: const [
-            Icon(Icons.volume_up, color: Colors.white),
-            SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                '🔊 Spoken Voice Alert: "Good morning Margaret. Remember to take your morning medication with water."',
-              ),
-            ),
-          ],
-        ),
-        duration: const Duration(seconds: 4),
-        backgroundColor: Colors.indigo.shade800,
-      ),
-    );
-
-    Future.delayed(const Duration(seconds: 4), () {
+  Future<void> _initTts() async {
+    _tts = FlutterTts();
+    await _tts?.setLanguage(widget.language.isNotEmpty ? widget.language : 'en-US');
+    await _tts?.setSpeechRate(0.42);
+    await _tts?.setVolume(1.0);
+    await _tts?.setPitch(1.0);
+    _tts?.setCompletionHandler(() {
       if (mounted) {
-        setState(() {
-          isSpeakingReminder = false;
-        });
+        setState(() => _isSpeaking = false);
       }
     });
   }
 
   @override
+  void dispose() {
+    _tts?.stop();
+    super.dispose();
+  }
+
+  Future<void> _speak(String message) async {
+    if (_isSpeaking) {
+      await _tts?.stop();
+      setState(() => _isSpeaking = false);
+      return;
+    }
+    setState(() => _isSpeaking = true);
+    try {
+      await _tts?.speak(message);
+    } catch (_) {}
+  }
+
+  String getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour >= 5 && hour < 12) {
+      return 'Good Morning';
+    } else if (hour >= 12 && hour < 17) {
+      return 'Good Afternoon';
+    } else if (hour >= 17 && hour < 21) {
+      return 'Good Evening';
+    } else {
+      return 'Good Night';
+    }
+  }
+
+  void _showMedicationDialog() {
+    final message =
+        '${widget.name}, remember to take your scheduled medication with a glass of water.';
+    _speak(message);
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppDimensions.radiusLarge),
+          side: const BorderSide(color: AppColors.error, width: 2.0),
+        ),
+        content: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: const [
+              Icon(
+                Icons.medication_rounded,
+                size: 64.0,
+                color: AppColors.error,
+              ),
+              SizedBox(height: 16.0),
+              Text(
+                'Medication',
+                style: TextStyle(
+                  fontSize: 24.0,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              SizedBox(height: 12.0),
+              Text(
+                'Please take your scheduled medication with water.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 18.0,
+                  color: AppColors.textSecondary,
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.error,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+              ),
+              onPressed: () {
+                _tts?.stop();
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Medication marked as taken.',
+                      style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                    ),
+                    backgroundColor: AppColors.success,
+                  ),
+                );
+              },
+              child: const Text(
+                'I Took It',
+                style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8.0),
+          TextButton(
+            onPressed: () {
+              _tts?.stop();
+              Navigator.pop(ctx);
+            },
+            child: const Text(
+              'Remind Me Later',
+              style: TextStyle(fontSize: 16.0, color: AppColors.textSecondary),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showHydrationDialog() {
+    final message =
+        '${widget.name}, drink a fresh glass of water to stay healthy and hydrated.';
+    _speak(message);
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppDimensions.radiusLarge),
+          side: const BorderSide(color: AppColors.info, width: 2.0),
+        ),
+        content: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: const [
+              Icon(
+                Icons.water_drop_rounded,
+                size: 64.0,
+                color: AppColors.info,
+              ),
+              SizedBox(height: 16.0),
+              Text(
+                'Hydration',
+                style: TextStyle(
+                  fontSize: 24.0,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              SizedBox(height: 12.0),
+              Text(
+                'Drink a fresh glass of water to stay energized.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 18.0,
+                  color: AppColors.textSecondary,
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.info,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+              ),
+              onPressed: () {
+                _tts?.stop();
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Hydration goal recorded.',
+                      style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                    ),
+                    backgroundColor: AppColors.success,
+                  ),
+                );
+              },
+              child: const Text(
+                'Drank Water',
+                style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8.0),
+          TextButton(
+            onPressed: () {
+              _tts?.stop();
+              Navigator.pop(ctx);
+            },
+            child: const Text(
+              'Remind Me Later',
+              style: TextStyle(fontSize: 16.0, color: AppColors.textSecondary),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        title: Text(
-          widget.isCaretaker ? '🛡️ Caretaker Portal' : '🧠 MindWeave',
-          style: const TextStyle(fontWeight: FontWeight.bold),
+        title: const Text(
+          'MindWeave',
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+            fontSize: 24.0,
+            color: AppColors.textPrimary,
+          ),
         ),
         centerTitle: true,
         actions: [
           IconButton(
-            tooltip: 'Sign Out / Switch Portal',
-            icon: const Icon(Icons.logout),
+            tooltip: 'Sign Out',
+            icon: const Icon(Icons.logout_rounded, size: 26.0),
             onPressed: () {
               Navigator.pushReplacement(
                 context,
@@ -95,218 +289,88 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (widget.isCaretaker)
-                Container(
-                  margin: const EdgeInsets.only(bottom: 20),
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: Colors.amber.shade50,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: Colors.amber.shade300),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.admin_panel_settings,
-                          color: Colors.amber.shade900),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          'Authenticated Caretaker Session: Monitoring care plan and cognitive health.',
-                          style: TextStyle(
-                            color: Colors.amber.shade900,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
+              // Clear, calming personalized greeting
               Text(
-                getGreeting(),
+                '${getGreeting()}, ${widget.name}',
                 style: const TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 26.0,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textPrimary,
+                  letterSpacing: -0.2,
                 ),
               ),
+              const SizedBox(height: 16.0),
 
-              const SizedBox(height: 8),
-
-              Text(
-                'Welcome, ${widget.name}! 👋',
-                style: const TextStyle(fontSize: 24),
-              ),
-
-              const SizedBox(height: 8),
-
-              Text(
-                'Ready for today\'s brain activity & care routine?',
-                style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.grey.shade700,
-                ),
-              ),
-
-              const SizedBox(height: 25),
-
-              // VOICE REMINDER BANNER
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: isSpeakingReminder
-                        ? [Colors.deepPurple.shade600, Colors.indigo.shade700]
-                        : [Colors.indigo.shade600, Colors.blue.shade700],
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.indigo.withOpacity(0.3),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              // 2x2 Oversized Grid for Maximum Simplicity & Low Cognitive Load
+              Expanded(
+                child: GridView.count(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 16.0,
+                  mainAxisSpacing: 16.0,
+                  childAspectRatio: 1.05,
+                  physics: const BouncingScrollPhysics(),
                   children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: Colors.white24,
-                            shape: BoxShape.circle,
+                    // Card 1: Memory Games
+                    _buildOversizedCard(
+                      label: 'Memory Games',
+                      icon: Icons.extension_rounded,
+                      color: AppColors.primaryDark,
+                      backgroundColor: const Color(0xFFEFF6FF),
+                      borderColor: AppColors.primaryDark,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const GamesScreen(),
                           ),
-                          child: Icon(
-                            isSpeakingReminder
-                                ? Icons.record_voice_over
-                                : Icons.volume_up,
-                            color: Colors.white,
-                            size: 26,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                isSpeakingReminder
-                                    ? '🔊 Speaking Voice Alert...'
-                                    : '🔔 Spoken Reminder Notification',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                'Voice: ${widget.language}',
-                                style: const TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                        );
+                      },
                     ),
-                    const SizedBox(height: 14),
-                    Text(
-                      '"$currentReminderText"',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        height: 1.4,
-                        fontStyle: FontStyle.italic,
-                      ),
+
+                    // Card 2: Medication
+                    _buildOversizedCard(
+                      label: 'Medication',
+                      icon: Icons.medication_rounded,
+                      color: AppColors.error,
+                      backgroundColor: const Color(0xFFFEF2F2),
+                      borderColor: AppColors.error,
+                      onTap: _showMedicationDialog,
                     ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: Colors.indigo.shade900,
+
+                    // Card 3: Hydration
+                    _buildOversizedCard(
+                      label: 'Hydration',
+                      icon: Icons.water_drop_rounded,
+                      color: AppColors.info,
+                      backgroundColor: const Color(0xFFF0F9FF),
+                      borderColor: AppColors.info,
+                      onTap: _showHydrationDialog,
+                    ),
+
+                    // Card 4: Voice Assistant
+                    _buildOversizedCard(
+                      label: 'Voice Assistant',
+                      icon: Icons.record_voice_over_rounded,
+                      color: AppColors.secondary,
+                      backgroundColor: const Color(0xFFF0FDF4),
+                      borderColor: AppColors.secondary,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const VoiceScreen(),
                           ),
-                          onPressed: _simulateVoiceReminder,
-                          icon: Icon(
-                            isSpeakingReminder
-                                ? Icons.hearing
-                                : Icons.play_arrow,
-                          ),
-                          label: Text(
-                            isSpeakingReminder
-                                ? 'Speaking Now...'
-                                : 'Hear Spoken Alert',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ],
+                        );
+                      },
                     ),
                   ],
                 ),
-              ),
-
-              const SizedBox(height: 25),
-
-              _menuCard(
-                context,
-                icon: '🧩',
-                title: 'Memory Games',
-                subtitle: 'Exercise your memory and attention',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const GamesScreen(),
-                    ),
-                  );
-                },
-              ),
-
-              const SizedBox(height: 16),
-
-              _menuCard(
-                context,
-                icon: '🎤',
-                title: 'Talk to MindWeave',
-                subtitle: 'Speak and interact using your voice',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const VoiceScreen(),
-                    ),
-                  );
-                },
-              ),
-
-              const SizedBox(height: 16),
-
-              _menuCard(
-                context,
-                icon: '📊',
-                title: 'My Progress',
-                subtitle: 'See your cognitive training progress',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const ProgressScreen(),
-                    ),
-                  );
-                },
               ),
             ],
           ),
@@ -315,55 +379,53 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _menuCard(
-    BuildContext context, {
-    required String icon,
-    required String title,
-    required String subtitle,
+  /// Builds a distinct, oversized card with a massive icon and a single bold text label.
+  Widget _buildOversizedCard({
+    required String label,
+    required IconData icon,
+    required Color color,
+    required Color backgroundColor,
+    required Color borderColor,
     required VoidCallback onTap,
   }) {
     return Card(
-      elevation: 3,
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      color: backgroundColor,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppDimensions.radiusLarge),
+        side: BorderSide(color: borderColor, width: 2.5),
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(20),
         onTap: onTap,
+        borderRadius: BorderRadius.circular(AppDimensions.radiusLarge),
         child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Row(
+          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
+              // Massive, universally understood icon
+              Icon(
                 icon,
-                style: const TextStyle(fontSize: 45),
+                size: 72.0,
+                color: color,
               ),
+              const SizedBox(height: 14.0),
 
-              const SizedBox(width: 18),
-
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 21,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-
-                    const SizedBox(height: 5),
-
-                    Text(
-                      subtitle,
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                  ],
+              // Single bold text label
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.w800,
+                  color: color,
+                  height: 1.2,
+                  letterSpacing: -0.2,
+                  fontFamily: 'Arial',
                 ),
               ),
-
-              const Icon(Icons.arrow_forward_ios),
             ],
           ),
         ),
