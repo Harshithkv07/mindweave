@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../core/theme.dart';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../services/storage_service.dart';
@@ -188,7 +189,7 @@ class _RememberObjectsScreenState extends State<RememberObjectsScreen> {
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.indigo,
+                backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
               ),
               onPressed: () {
@@ -227,7 +228,7 @@ class _RememberObjectsScreenState extends State<RememberObjectsScreen> {
         break;
       case 'medium':
       default:
-        color = Colors.indigo;
+        color = AppColors.primary;
     }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -269,18 +270,18 @@ class _RememberObjectsScreenState extends State<RememberObjectsScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
-                  color: Colors.indigo.shade50,
+                  color: AppColors.primaryContainer,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.indigo.shade100),
+                  border: Border.all(color: AppColors.primaryContainer),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.auto_awesome, size: 18, color: Colors.indigo),
+                    const Icon(Icons.auto_awesome, size: 18, color: AppColors.primary),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'Adapted to your performance: ${_config.objectsToRememberCount} items, ${_config.displayDurationSeconds}s memorization, ${_config.optionsCount} choices',
-                        style: TextStyle(fontSize: 12, color: Colors.indigo.shade900, fontWeight: FontWeight.w500),
+                        style: TextStyle(fontSize: 12, color: AppColors.primaryDark, fontWeight: FontWeight.w500),
                       ),
                     ),
                   ],
@@ -328,10 +329,10 @@ class _RememberObjectsScreenState extends State<RememberObjectsScreen> {
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: Colors.indigo.shade200, width: 2),
+                            border: Border.all(color: AppColors.primaryLight, width: 2),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.indigo.withValues(alpha: 0.1),
+                                color: AppColors.primary.withValues(alpha: 0.1),
                                 blurRadius: 10,
                                 offset: const Offset(0, 4),
                               ),
@@ -426,7 +427,7 @@ class _RememberObjectsScreenState extends State<RememberObjectsScreen> {
       ),
       child: Column(
         children: [
-          Icon(icon, size: 22, color: Colors.indigo),
+          Icon(icon, size: 22, color: AppColors.primary),
           const SizedBox(height: 4),
           Text(
             value,

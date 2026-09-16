@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/theme.dart';
 import 'package:provider/provider.dart';
 import '../services/mindweave_provider.dart';
 
@@ -125,7 +126,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                                 const Divider(height: 20),
                                 _domainRow('Attention & Focus', profile.attentionScore, Colors.teal),
                                 const Divider(height: 20),
-                                _domainRow('Pattern Recognition', profile.patternScore, Colors.purple),
+                                _domainRow('Pattern Recognition', profile.patternScore, Colors.cyan.shade700),
                                 const Divider(height: 20),
                                 _domainRow('Routine & Sequential', profile.routineScore, Colors.amber.shade800),
                               ],
@@ -178,7 +179,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                               ),
                               child: ListTile(
                                 leading: CircleAvatar(
-                                  backgroundColor: Colors.indigo.shade50,
+                                  backgroundColor: AppColors.primaryContainer,
                                   child: Text(
                                     s.gameType.startsWith('seq')
                                         ? '🔢'

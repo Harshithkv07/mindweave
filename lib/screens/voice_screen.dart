@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/theme.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:provider/provider.dart';
 import '../services/mindweave_provider.dart';
@@ -140,35 +141,34 @@ class _VoiceScreenState extends State<VoiceScreen>
     final patientName = profile?.name ?? 'Margaret';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: const Text(
           '🎤 Voice Guidance Assistant',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF1E293B),
+        backgroundColor: Colors.transparent,
+        foregroundColor: AppColors.textPrimary,
         elevation: 0,
         actions: [
           Container(
             margin: const EdgeInsets.only(right: 16),
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.green.shade50,
+              color: AppColors.successContainer,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.green.shade200),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.wifi_off, size: 14, color: Colors.green.shade800),
+                const Icon(Icons.wifi_off, size: 14, color: AppColors.onSuccessContainer),
                 const SizedBox(width: 6),
                 Text(
                   '100% Offline TTS',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: Colors.green.shade800,
+                    color: AppColors.onSuccessContainer,
                   ),
                 ),
               ],
@@ -176,7 +176,9 @@ class _VoiceScreenState extends State<VoiceScreen>
           ),
         ],
       ),
-      body: SingleChildScrollView(
+      body: DecoratedBox(
+        decoration: const BoxDecoration(gradient: AppGradients.screenWash),
+        child: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Center(
           child: ConstrainedBox(
@@ -240,7 +242,7 @@ class _VoiceScreenState extends State<VoiceScreen>
                   subtitle: 'Explains rules and comforts the patient.',
                   message:
                       'Ready for today\'s memory exercise? Remember, there is no timer pressure. Finding the matching cards helps keep your neural pathways active and strong. Let\'s begin whenever you are ready.',
-                  color: Colors.indigo,
+                  color: AppColors.primary,
                 ),
                 const SizedBox(height: 12),
                 _buildCareFlowCard(
@@ -249,7 +251,7 @@ class _VoiceScreenState extends State<VoiceScreen>
                   subtitle: 'Guided relaxation and reassurance.',
                   message:
                       'Take a slow, deep breath in through your nose. Hold it gently. Now exhale slowly through your mouth. You are safe, supported, and doing wonderfully today.',
-                  color: Colors.purple,
+                  color: Colors.cyan.shade700,
                 ),
 
                 const SizedBox(height: 28),
@@ -261,6 +263,7 @@ class _VoiceScreenState extends State<VoiceScreen>
             ),
           ),
         ),
+        ),
       ),
     );
   }
@@ -270,21 +273,9 @@ class _VoiceScreenState extends State<VoiceScreen>
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: _isSpeaking
-              ? [Colors.deepPurple.shade700, Colors.indigo.shade800]
-              : [Colors.indigo.shade700, Colors.blue.shade800],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        gradient: _isSpeaking ? AppGradients.heroDeep : AppGradients.hero,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.indigo.withValues(alpha: 0.3),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
+        boxShadow: softCardShadow(opacity: 0.25),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -343,7 +334,7 @@ class _VoiceScreenState extends State<VoiceScreen>
                           ? 'Speech synthesis active (Offline TTS)'
                           : 'Clear, gentle speech guidance for daily routines',
                       style: TextStyle(
-                        color: Colors.indigo.shade100,
+                        color: AppColors.primaryContainer,
                         fontSize: 13,
                       ),
                     ),
@@ -393,7 +384,7 @@ class _VoiceScreenState extends State<VoiceScreen>
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
-                    foregroundColor: Colors.indigo.shade900,
+                    foregroundColor: AppColors.primaryDark,
                     padding: const EdgeInsets.symmetric(
                         horizontal: 18, vertical: 12),
                   ),
@@ -444,7 +435,7 @@ class _VoiceScreenState extends State<VoiceScreen>
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
-                    color: Colors.indigo.shade700,
+                    color: AppColors.primaryDark,
                   ),
                 ),
               ],
@@ -481,19 +472,23 @@ class _VoiceScreenState extends State<VoiceScreen>
     required String title,
     required String subtitle,
     required String message,
-    required MaterialColor color,
+    required Color color,
   }) {
     final isThisSpeaking = _isSpeaking && _currentSpeakingText == message;
 
-    return Card(
-      elevation: isThisSpeaking ? 3 : 1,
-      shape: RoundedRectangleBorder(
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surfaceLight,
         borderRadius: BorderRadius.circular(16),
-        side: isThisSpeaking
-            ? BorderSide(color: color.shade600, width: 2)
-            : BorderSide.none,
+        boxShadow: softCardShadow(opacity: isThisSpeaking ? 0.18 : 0.08),
+        border: isThisSpeaking
+            ? Border.all(color: color, width: 2)
+            : null,
       ),
-      child: InkWell(
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: () => _speak(message),
         child: Padding(
@@ -504,7 +499,7 @@ class _VoiceScreenState extends State<VoiceScreen>
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: color.shade50,
+                  color: color.withValues(alpha: 0.14),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(emoji, style: const TextStyle(fontSize: 26)),
@@ -550,7 +545,7 @@ class _VoiceScreenState extends State<VoiceScreen>
                   isThisSpeaking
                       ? Icons.stop_circle_rounded
                       : Icons.play_circle_fill_rounded,
-                  color: isThisSpeaking ? Colors.red : color.shade700,
+                  color: isThisSpeaking ? AppColors.error : color,
                   size: 34,
                 ),
                 onPressed: () {
@@ -563,6 +558,7 @@ class _VoiceScreenState extends State<VoiceScreen>
               ),
             ],
           ),
+        ),
         ),
       ),
     );
@@ -617,7 +613,7 @@ class _VoiceScreenState extends State<VoiceScreen>
                 const SizedBox(width: 10),
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.indigo.shade700,
+                    backgroundColor: AppColors.primaryDark,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(
                         horizontal: 18, vertical: 12),

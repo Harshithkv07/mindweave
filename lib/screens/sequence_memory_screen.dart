@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../core/theme.dart';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../services/storage_service.dart';
@@ -238,7 +239,7 @@ class _SequenceMemoryScreenState extends State<SequenceMemoryScreen> {
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.indigo,
+                backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
               ),
               onPressed: () {
@@ -277,7 +278,7 @@ class _SequenceMemoryScreenState extends State<SequenceMemoryScreen> {
         break;
       case 'medium':
       default:
-        color = Colors.indigo;
+        color = AppColors.primary;
     }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -319,18 +320,18 @@ class _SequenceMemoryScreenState extends State<SequenceMemoryScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
-                  color: Colors.indigo.shade50,
+                  color: AppColors.primaryContainer,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.indigo.shade100),
+                  border: Border.all(color: AppColors.primaryContainer),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.auto_awesome, size: 18, color: Colors.indigo),
+                    const Icon(Icons.auto_awesome, size: 18, color: AppColors.primary),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'Adapted to your performance: ${_config.availableSymbolsCount} symbols (${_config.symbolGridColumns} cols, ${_config.displayIntervalMs}ms flash)',
-                        style: TextStyle(fontSize: 12, color: Colors.indigo.shade900, fontWeight: FontWeight.w500),
+                        style: TextStyle(fontSize: 12, color: AppColors.primaryDark, fontWeight: FontWeight.w500),
                       ),
                     ),
                   ],
@@ -394,12 +395,12 @@ class _SequenceMemoryScreenState extends State<SequenceMemoryScreen> {
                         decoration: BoxDecoration(
                           color: isHighlighted
                               ? Colors.amber.shade100
-                              : (isUserFilled ? Colors.indigo.shade50 : Colors.grey.shade100),
+                              : (isUserFilled ? AppColors.primaryContainer : Colors.grey.shade100),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
                             color: isHighlighted
                                 ? Colors.amber.shade700
-                                : (isUserFilled ? Colors.indigo.shade400 : Colors.grey.shade300),
+                                : (isUserFilled ? AppColors.primary : Colors.grey.shade300),
                             width: isHighlighted ? 2.5 : 1.5,
                           ),
                         ),
@@ -411,7 +412,7 @@ class _SequenceMemoryScreenState extends State<SequenceMemoryScreen> {
                             style: TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
-                              color: isHighlighted ? Colors.black : Colors.indigo.shade800,
+                              color: isHighlighted ? Colors.black : AppColors.primaryDark,
                             ),
                           ),
                         ),
@@ -444,14 +445,14 @@ class _SequenceMemoryScreenState extends State<SequenceMemoryScreen> {
                         color: showingSequence ? Colors.grey.shade100 : Colors.white,
                         borderRadius: BorderRadius.circular(18),
                         border: Border.all(
-                          color: showingSequence ? Colors.grey.shade300 : Colors.indigo.shade300,
+                          color: showingSequence ? Colors.grey.shade300 : AppColors.primaryLight,
                           width: 2,
                         ),
                         boxShadow: showingSequence
                             ? []
                             : [
                                 BoxShadow(
-                                  color: Colors.indigo.withValues(alpha: 0.1),
+                                  color: AppColors.primary.withValues(alpha: 0.1),
                                   blurRadius: 8,
                                   offset: const Offset(0, 3),
                                 ),
@@ -486,7 +487,7 @@ class _SequenceMemoryScreenState extends State<SequenceMemoryScreen> {
       ),
       child: Column(
         children: [
-          Icon(icon, size: 22, color: Colors.indigo),
+          Icon(icon, size: 22, color: AppColors.primary),
           const SizedBox(height: 4),
           Text(
             value,

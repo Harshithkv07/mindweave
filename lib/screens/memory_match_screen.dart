@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../core/theme.dart';
 import 'package:flutter/material.dart';
 import '../services/storage_service.dart';
 import '../services/adaptive_difficulty_engine.dart';
@@ -205,7 +206,7 @@ class _MemoryMatchScreenState extends State<MemoryMatchScreen> {
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.indigo,
+                backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
               ),
               onPressed: () {
@@ -244,7 +245,7 @@ class _MemoryMatchScreenState extends State<MemoryMatchScreen> {
         break;
       case 'medium':
       default:
-        color = Colors.indigo;
+        color = AppColors.primary;
     }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -286,18 +287,18 @@ class _MemoryMatchScreenState extends State<MemoryMatchScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
-                  color: Colors.indigo.shade50,
+                  color: AppColors.primaryContainer,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.indigo.shade100),
+                  border: Border.all(color: AppColors.primaryContainer),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.auto_awesome, size: 18, color: Colors.indigo),
+                    const Icon(Icons.auto_awesome, size: 18, color: AppColors.primary),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'Adapted to your recent performance: ${_config.totalCards} cards (${_config.gridColumns} cols, ${_config.flipBackDurationMs}ms reveal)',
-                        style: TextStyle(fontSize: 12, color: Colors.indigo.shade900, fontWeight: FontWeight.w500),
+                        style: TextStyle(fontSize: 12, color: AppColors.primaryDark, fontWeight: FontWeight.w500),
                       ),
                     ),
                   ],
@@ -337,9 +338,9 @@ class _MemoryMatchScreenState extends State<MemoryMatchScreen> {
                       duration: const Duration(milliseconds: 250),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
-                        color: revealed[index] ? Colors.white : Colors.indigo.shade600,
+                        color: revealed[index] ? Colors.white : AppColors.primary,
                         border: Border.all(
-                          color: revealed[index] ? Colors.indigo.shade300 : Colors.indigo.shade700,
+                          color: revealed[index] ? AppColors.primaryLight : AppColors.primaryDark,
                           width: 2,
                         ),
                         boxShadow: [
@@ -372,7 +373,7 @@ class _MemoryMatchScreenState extends State<MemoryMatchScreen> {
                 children: [
                   Text(
                     'Accuracy: ${accuracy.toStringAsFixed(0)}%',
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.indigo),
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primary),
                   ),
                   const SizedBox(width: 20),
                   Text(
@@ -398,7 +399,7 @@ class _MemoryMatchScreenState extends State<MemoryMatchScreen> {
       ),
       child: Column(
         children: [
-          Icon(icon, size: 22, color: Colors.indigo),
+          Icon(icon, size: 22, color: AppColors.primary),
           const SizedBox(height: 4),
           Text(
             value,

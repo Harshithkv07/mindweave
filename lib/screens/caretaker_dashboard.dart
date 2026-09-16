@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../core/theme.dart';
 import '../services/storage_service.dart';
 import '../services/mindweave_provider.dart';
-import 'login_screen.dart';
 
 /// Professional Caretaker Analytics Dashboard.
 ///
@@ -161,11 +160,18 @@ class _CaretakerDashboardScreenState extends State<CaretakerDashboardScreen> {
             title: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.shield_rounded, color: AppColors.primaryDark, size: 28),
+                Container(
+                  padding: const EdgeInsets.all(6.0),
+                  decoration: const BoxDecoration(
+                    gradient: AppGradients.hero,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.shield_rounded, color: Colors.white, size: 18),
+                ),
                 const SizedBox(width: 10),
-                Text(
+                const Text(
                   'Caretaker Analytics',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 22.0,
                     color: AppColors.textPrimary,
@@ -181,18 +187,17 @@ class _CaretakerDashboardScreenState extends State<CaretakerDashboardScreen> {
                 onPressed: _refresh,
               ),
               IconButton(
-                tooltip: 'Sign Out',
-                icon: const Icon(Icons.logout_rounded, size: 26),
+                tooltip: 'Switch Profile',
+                icon: const Icon(Icons.switch_account_rounded, size: 26),
                 onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => const LoginScreen()),
-                  );
+                  Navigator.of(context).popUntil((route) => route.isFirst);
                 },
               ),
             ],
           ),
-          body: _isLoading
+          body: DecoratedBox(
+            decoration: const BoxDecoration(gradient: AppGradients.screenWash),
+            child: _isLoading
               ? const Center(child: CircularProgressIndicator())
               : ListView(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 18.0),
@@ -214,6 +219,7 @@ class _CaretakerDashboardScreenState extends State<CaretakerDashboardScreen> {
                     const SizedBox(height: 24.0),
                   ],
                 ),
+          ),
         );
       },
     );
@@ -229,12 +235,11 @@ class _CaretakerDashboardScreenState extends State<CaretakerDashboardScreen> {
         : sessions.fold<double>(0.0, (acc, s) => acc + s.accuracy) /
             sessions.length;
 
-    return Card(
-      elevation: 0,
-      color: AppColors.surfaceLight,
-      shape: RoundedRectangleBorder(
+    return Container(
+      decoration: BoxDecoration(
+        gradient: AppGradients.heroDeep,
         borderRadius: BorderRadius.circular(AppDimensions.radiusLarge),
-        side: const BorderSide(color: AppColors.borderLight, width: 1.5),
+        boxShadow: softCardShadow(opacity: 0.22),
       ),
       child: Padding(
         padding: AppDimensions.cardPadding,
@@ -253,7 +258,7 @@ class _CaretakerDashboardScreenState extends State<CaretakerDashboardScreen> {
                         style: TextStyle(
                           fontSize: 14.0,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.primary,
+                          color: Colors.white.withValues(alpha: 0.8),
                           letterSpacing: 0.5,
                         ),
                       ),
@@ -263,7 +268,7 @@ class _CaretakerDashboardScreenState extends State<CaretakerDashboardScreen> {
                         style: const TextStyle(
                           fontSize: 22.0,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.textPrimary,
+                          color: Colors.white,
                         ),
                       ),
                     ],
@@ -272,21 +277,20 @@ class _CaretakerDashboardScreenState extends State<CaretakerDashboardScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
                   decoration: BoxDecoration(
-                    color: AppColors.successContainer,
+                    color: Colors.white.withValues(alpha: 0.18),
                     borderRadius: BorderRadius.circular(AppDimensions.radiusPill),
-                    border: Border.all(color: AppColors.success, width: 1.2),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: const [
-                      Icon(Icons.circle, size: 8, color: AppColors.success),
+                      Icon(Icons.circle, size: 8, color: Colors.white),
                       SizedBox(width: 6),
                       Text(
                         'Local Offline Storage',
                         style: TextStyle(
                           fontSize: 12.0,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.onSuccessContainer,
+                          color: Colors.white,
                         ),
                       ),
                     ],
@@ -303,24 +307,18 @@ class _CaretakerDashboardScreenState extends State<CaretakerDashboardScreen> {
                   label: 'Baseline Score',
                   value: '${(profile?.baselineScore ?? avgAccuracy).toStringAsFixed(1)}%',
                   icon: Icons.speed_rounded,
-                  color: AppColors.primaryDark,
-                  backgroundColor: AppColors.primaryContainer,
                 ),
                 const SizedBox(width: 12.0),
                 _buildStatBadge(
                   label: 'Total Sessions',
                   value: '${sessions.length}',
                   icon: Icons.history_rounded,
-                  color: AppColors.secondary,
-                  backgroundColor: AppColors.secondaryContainer,
                 ),
                 const SizedBox(width: 12.0),
                 _buildStatBadge(
                   label: 'Avg Accuracy',
                   value: '${avgAccuracy.toStringAsFixed(1)}%',
                   icon: Icons.check_circle_outline_rounded,
-                  color: AppColors.tertiary,
-                  backgroundColor: AppColors.tertiaryContainer,
                 ),
               ],
             ),
@@ -334,37 +332,34 @@ class _CaretakerDashboardScreenState extends State<CaretakerDashboardScreen> {
     required String label,
     required String value,
     required IconData icon,
-    required Color color,
-    required Color backgroundColor,
   }) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
         decoration: BoxDecoration(
-          color: backgroundColor,
+          color: Colors.white.withValues(alpha: 0.14),
           borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
-          border: Border.all(color: color.withValues(alpha: 0.3), width: 1.2),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, size: 22.0, color: color),
+            Icon(icon, size: 22.0, color: Colors.white),
             const SizedBox(height: 6.0),
             Text(
               value,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 20.0,
                 fontWeight: FontWeight.w800,
-                color: color,
+                color: Colors.white,
               ),
             ),
             const SizedBox(height: 2.0),
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12.0,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
+                color: Colors.white.withValues(alpha: 0.85),
               ),
             ),
           ],
@@ -395,12 +390,11 @@ class _CaretakerDashboardScreenState extends State<CaretakerDashboardScreen> {
     final waterPct =
         ((_dailyWaterGlasses / _targetWaterGlasses) * 100).clamp(0, 100).toInt();
 
-    return Card(
-      elevation: 0,
-      color: AppColors.surfaceLight,
-      shape: RoundedRectangleBorder(
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surfaceLight,
         borderRadius: BorderRadius.circular(AppDimensions.radiusLarge),
-        side: const BorderSide(color: AppColors.borderLight, width: 1.5),
+        boxShadow: softCardShadow(),
       ),
       child: Padding(
         padding: AppDimensions.cardPadding,
@@ -470,7 +464,7 @@ class _CaretakerDashboardScreenState extends State<CaretakerDashboardScreen> {
             Container(
               padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
-                color: const Color(0xFFFEF2F2),
+                color: AppColors.errorContainer,
                 borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
                 border: Border.all(color: AppColors.error.withValues(alpha: 0.25), width: 1.5),
               ),
@@ -586,7 +580,7 @@ class _CaretakerDashboardScreenState extends State<CaretakerDashboardScreen> {
             Container(
               padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
-                color: const Color(0xFFF0F9FF),
+                color: AppColors.infoContainer,
                 borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
                 border: Border.all(color: AppColors.info.withValues(alpha: 0.25), width: 1.5),
               ),
@@ -705,12 +699,11 @@ class _CaretakerDashboardScreenState extends State<CaretakerDashboardScreen> {
                 s.gameType.toLowerCase() == _selectedGameFilter.toLowerCase())
             .toList();
 
-    return Card(
-      elevation: 0,
-      color: AppColors.surfaceLight,
-      shape: RoundedRectangleBorder(
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surfaceLight,
         borderRadius: BorderRadius.circular(AppDimensions.radiusLarge),
-        side: const BorderSide(color: AppColors.borderLight, width: 1.5),
+        boxShadow: softCardShadow(),
       ),
       child: Padding(
         padding: AppDimensions.cardPadding,
@@ -1095,12 +1088,11 @@ class _CaretakerDashboardScreenState extends State<CaretakerDashboardScreen> {
   Widget _buildRecentSessionsCard(List<CognitiveSession> sessions) {
     final recent = sessions.reversed.take(6).toList();
 
-    return Card(
-      elevation: 0,
-      color: AppColors.surfaceLight,
-      shape: RoundedRectangleBorder(
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surfaceLight,
         borderRadius: BorderRadius.circular(AppDimensions.radiusLarge),
-        side: const BorderSide(color: AppColors.borderLight, width: 1.5),
+        boxShadow: softCardShadow(),
       ),
       child: Padding(
         padding: AppDimensions.cardPadding,

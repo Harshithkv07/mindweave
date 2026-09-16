@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:provider/provider.dart';
 import '../core/theme.dart';
+import '../services/mindweave_provider.dart';
+import '../services/storage_service.dart';
 import 'games_screen.dart';
 import 'voice_screen.dart';
-import 'login_screen.dart';
+import 'progress_screen.dart';
 
-/// Redesigned Patient Dashboard optimized for maximum simplicity.
-///
-/// Features:
-/// - 2x2 oversized grid layout utilizing Flutter's GridView.
-/// - Distinct, large cards for 'Memory Games', 'Medication', 'Hydration', and 'Voice Assistant'.
-/// - Massive, universally understood icons (72dp) and single bold text labels (22sp).
-/// - Completely uncluttered design eliminating all decorative distractions to reduce cognitive load.
+/// Patient dashboard: greeting header, live stat cards, quick actions, and
+/// today's schedule — a full home dashboard rather than a bare action grid.
 class HomeScreen extends StatefulWidget {
   final String name;
   final String language;
@@ -36,6 +34,9 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _initTts();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<MindWeaveProvider>(context, listen: false).refreshData();
+    });
   }
 
   Future<void> _initTts() async {
@@ -92,7 +93,6 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppDimensions.radiusLarge),
-          side: const BorderSide(color: AppColors.error, width: 2.0),
         ),
         content: Padding(
           padding: const EdgeInsets.symmetric(vertical: 12.0),
@@ -181,7 +181,6 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppDimensions.radiusLarge),
-          side: const BorderSide(color: AppColors.info, width: 2.0),
         ),
         content: Padding(
           padding: const EdgeInsets.symmetric(vertical: 12.0),
@@ -260,175 +259,432 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  IconData _iconForCategory(String category) {
+    switch (category.toLowerCase()) {
+      case 'medication':
+        return Icons.medication_rounded;
+      case 'hydration':
+        return Icons.water_drop_rounded;
+      case 'cognitive':
+        return Icons.extension_rounded;
+      default:
+        return Icons.notifications_active_rounded;
+    }
+  }
+
+  Color _colorForCategory(String category) {
+    switch (category.toLowerCase()) {
+      case 'medication':
+        return AppColors.error;
+      case 'hydration':
+        return AppColors.info;
+      case 'cognitive':
+        return Colors.orange.shade800;
+      default:
+        return AppColors.secondary;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
-      appBar: AppBar(
-        title: const Text(
-          'MindWeave',
-          style: TextStyle(
-            fontWeight: FontWeight.w800,
-            fontSize: 24.0,
-            color: AppColors.textPrimary,
+    return Consumer<MindWeaveProvider>(
+      builder: (context, provider, _) {
+        final sessions = provider.sessions;
+        final reminders = provider.reminders;
+        final gamesCompleted = provider.progress['gamesCompleted'] ?? sessions.length;
+        final bestAccuracy = (provider.progress['bestAccuracy'] as num?)?.toDouble() ?? 0.0;
+        final todaysReminders = reminders.take(4).toList();
+
+        return Scaffold(
+          backgroundColor: AppColors.backgroundLight,
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Gradient dashboard header with avatar + quick actions.
+                  _buildHeader(reminders.length),
+                  const SizedBox(height: 18.0),
+
+                  // Live stat row pulled from real session/progress data.
+                  Row(
+                    children: [
+                      _statCard(
+                        icon: Icons.videogame_asset_rounded,
+                        color: AppColors.primary,
+                        value: '$gamesCompleted',
+                        label: 'Games Played',
+                      ),
+                      const SizedBox(width: 12.0),
+                      _statCard(
+                        icon: Icons.gps_fixed_rounded,
+                        color: AppColors.success,
+                        value: '${bestAccuracy.toStringAsFixed(0)}%',
+                        label: 'Best Accuracy',
+                      ),
+                      const SizedBox(width: 12.0),
+                      _statCard(
+                        icon: Icons.insights_rounded,
+                        color: Colors.orange.shade800,
+                        value: '${provider.baselineScore.toStringAsFixed(0)}%',
+                        label: 'Baseline',
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 26.0),
+
+                  const Text(
+                    'What would you like to do?',
+                    style: TextStyle(
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 14.0),
+
+                  GridView.count(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 14.0,
+                    mainAxisSpacing: 14.0,
+                    childAspectRatio: 1.15,
+                    children: [
+                      _buildActionCard(
+                        label: 'Memory Games',
+                        icon: Icons.extension_rounded,
+                        color: Colors.orange.shade800,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const GamesScreen()),
+                          );
+                        },
+                      ),
+                      _buildActionCard(
+                        label: 'Medication',
+                        icon: Icons.medication_rounded,
+                        color: AppColors.error,
+                        onTap: _showMedicationDialog,
+                      ),
+                      _buildActionCard(
+                        label: 'Hydration',
+                        icon: Icons.water_drop_rounded,
+                        color: AppColors.info,
+                        onTap: _showHydrationDialog,
+                      ),
+                      _buildActionCard(
+                        label: 'Voice Assistant',
+                        icon: Icons.record_voice_over_rounded,
+                        color: AppColors.secondary,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const VoiceScreen()),
+                          );
+                        },
+                      ),
+                      _buildActionCard(
+                        label: 'My Progress',
+                        icon: Icons.bar_chart_rounded,
+                        color: AppColors.primary,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const ProgressScreen()),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 28.0),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Today's Schedule",
+                        style: TextStyle(
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      Text(
+                        '${reminders.length} routines',
+                        style: const TextStyle(
+                          fontSize: 13.0,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12.0),
+
+                  if (todaysReminders.isEmpty)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(20.0),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceLight,
+                        borderRadius: BorderRadius.circular(AppDimensions.radiusLarge),
+                        boxShadow: softCardShadow(),
+                      ),
+                      child: const Text(
+                        'No routines scheduled yet.',
+                        style: TextStyle(color: AppColors.textSecondary),
+                      ),
+                    )
+                  else
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceLight,
+                        borderRadius: BorderRadius.circular(AppDimensions.radiusLarge),
+                        boxShadow: softCardShadow(),
+                      ),
+                      child: Column(
+                        children: [
+                          for (int i = 0; i < todaysReminders.length; i++) ...[
+                            _buildReminderRow(context, provider, todaysReminders[i]),
+                            if (i != todaysReminders.length - 1)
+                              const Divider(height: 1, indent: 20, endIndent: 20),
+                          ],
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
           ),
-        ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            tooltip: 'Sign Out',
-            icon: const Icon(Icons.logout_rounded, size: 26.0),
-            onPressed: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const LoginScreen(),
+        );
+      },
+    );
+  }
+
+  /// Gradient dashboard header: avatar, greeting, notification + profile-switch.
+  Widget _buildHeader(int reminderCount) {
+    final initial = widget.name.isNotEmpty ? widget.name[0].toUpperCase() : 'M';
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20.0),
+      decoration: BoxDecoration(
+        gradient: AppGradients.hero,
+        borderRadius: BorderRadius.circular(AppDimensions.radiusExtraLarge),
+        boxShadow: softCardShadow(opacity: 0.18),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 54.0,
+            height: 54.0,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.22),
+              shape: BoxShape.circle,
+            ),
+            child: Text(
+              initial,
+              style: const TextStyle(
+                fontSize: 24.0,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          const SizedBox(width: 14.0),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  getGreeting(),
+                  style: TextStyle(
+                    fontSize: 14.0,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white.withValues(alpha: 0.85),
+                  ),
                 ),
-              );
-            },
+                Text(
+                  widget.name,
+                  style: const TextStyle(
+                    fontSize: 22.0,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Material(
+                color: Colors.white.withValues(alpha: 0.18),
+                shape: const CircleBorder(),
+                child: const Padding(
+                  padding: EdgeInsets.all(10.0),
+                  child: Icon(Icons.notifications_none_rounded, size: 22.0, color: Colors.white),
+                ),
+              ),
+              if (reminderCount > 0)
+                Positioned(
+                  right: -2,
+                  top: -2,
+                  child: Container(
+                    padding: const EdgeInsets.all(3.0),
+                    decoration: const BoxDecoration(color: AppColors.tertiary, shape: BoxShape.circle),
+                    constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                    child: Text(
+                      '$reminderCount',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 10.0, fontWeight: FontWeight.w800, color: Colors.white),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(width: 10.0),
+          Material(
+            color: Colors.white.withValues(alpha: 0.18),
+            shape: const CircleBorder(),
+            child: IconButton(
+              tooltip: 'Switch Profile',
+              icon: const Icon(Icons.switch_account_rounded, size: 22.0, color: Colors.white),
+              onPressed: () {
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              },
+            ),
           ),
         ],
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Clear, calming personalized greeting
-              Text(
-                '${getGreeting()}, ${widget.name}',
-                style: const TextStyle(
-                  fontSize: 26.0,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary,
-                  letterSpacing: -0.2,
+    );
+  }
+
+  Widget _statCard({
+    required IconData icon,
+    required Color color,
+    required String value,
+    required String label,
+  }) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 14.0),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceLight,
+          borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
+          boxShadow: softCardShadow(),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, size: 22.0, color: color),
+            const SizedBox(height: 8.0),
+            Text(
+              value,
+              style: TextStyle(fontSize: 19.0, fontWeight: FontWeight.w800, color: color),
+            ),
+            const SizedBox(height: 2.0),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionCard({
+    required String label,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surfaceLight,
+        borderRadius: BorderRadius.circular(AppDimensions.radiusLarge),
+        boxShadow: softCardShadow(),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppDimensions.radiusLarge),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 14.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 56.0,
+                  height: 56.0,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, size: 30.0, color: color),
                 ),
-              ),
-              const SizedBox(height: 16.0),
-
-              // 2x2 Oversized Grid for Maximum Simplicity & Low Cognitive Load
-              Expanded(
-                child: GridView.count(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16.0,
-                  mainAxisSpacing: 16.0,
-                  childAspectRatio: 1.05,
-                  physics: const BouncingScrollPhysics(),
-                  children: [
-                    // Card 1: Memory Games
-                    _buildOversizedCard(
-                      label: 'Memory Games',
-                      icon: Icons.extension_rounded,
-                      color: AppColors.primaryDark,
-                      backgroundColor: const Color(0xFFEFF6FF),
-                      borderColor: AppColors.primaryDark,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const GamesScreen(),
-                          ),
-                        );
-                      },
-                    ),
-
-                    // Card 2: Medication
-                    _buildOversizedCard(
-                      label: 'Medication',
-                      icon: Icons.medication_rounded,
-                      color: AppColors.error,
-                      backgroundColor: const Color(0xFFFEF2F2),
-                      borderColor: AppColors.error,
-                      onTap: _showMedicationDialog,
-                    ),
-
-                    // Card 3: Hydration
-                    _buildOversizedCard(
-                      label: 'Hydration',
-                      icon: Icons.water_drop_rounded,
-                      color: AppColors.info,
-                      backgroundColor: const Color(0xFFF0F9FF),
-                      borderColor: AppColors.info,
-                      onTap: _showHydrationDialog,
-                    ),
-
-                    // Card 4: Voice Assistant
-                    _buildOversizedCard(
-                      label: 'Voice Assistant',
-                      icon: Icons.record_voice_over_rounded,
-                      color: AppColors.secondary,
-                      backgroundColor: const Color(0xFFF0FDF4),
-                      borderColor: AppColors.secondary,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const VoiceScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
+                const SizedBox(height: 10.0),
+                Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 15.0,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  /// Builds a distinct, oversized card with a massive icon and a single bold text label.
-  Widget _buildOversizedCard({
-    required String label,
-    required IconData icon,
-    required Color color,
-    required Color backgroundColor,
-    required Color borderColor,
-    required VoidCallback onTap,
-  }) {
-    return Card(
-      elevation: 0,
-      margin: EdgeInsets.zero,
-      color: backgroundColor,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppDimensions.radiusLarge),
-        side: BorderSide(color: borderColor, width: 2.5),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusLarge),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Massive, universally understood icon
-              Icon(
-                icon,
-                size: 72.0,
-                color: color,
-              ),
-              const SizedBox(height: 14.0),
-
-              // Single bold text label
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.w800,
-                  color: color,
-                  height: 1.2,
-                  letterSpacing: -0.2,
-                  fontFamily: 'Arial',
-                ),
-              ),
-            ],
+  Widget _buildReminderRow(BuildContext context, MindWeaveProvider provider, DailyReminder reminder) {
+    final color = _colorForCategory(reminder.category);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      child: Row(
+        children: [
+          Container(
+            width: 44.0,
+            height: 44.0,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(color: color.withValues(alpha: 0.15), shape: BoxShape.circle),
+            child: Icon(_iconForCategory(reminder.category), size: 22.0, color: color),
           ),
-        ),
+          const SizedBox(width: 14.0),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  reminder.title,
+                  style: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                ),
+                Text(
+                  reminder.time,
+                  style: const TextStyle(fontSize: 13.0, color: AppColors.textSecondary),
+                ),
+              ],
+            ),
+          ),
+          Switch(
+            value: reminder.isEnabled,
+            activeThumbColor: AppColors.success,
+            onChanged: (_) => provider.toggleReminder(reminder.id),
+          ),
+        ],
       ),
     );
   }

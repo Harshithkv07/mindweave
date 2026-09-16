@@ -16,10 +16,10 @@ class AppDimensions {
   static const double minLegibleFontSize = 15.0;
 
   /// Rounded corner radiuses
-  static const double radiusSmall = 12.0;
-  static const double radiusMedium = 16.0;
-  static const double radiusLarge = 20.0;
-  static const double radiusExtraLarge = 24.0;
+  static const double radiusSmall = 14.0;
+  static const double radiusMedium = 18.0;
+  static const double radiusLarge = 24.0;
+  static const double radiusExtraLarge = 28.0;
   static const double radiusPill = 100.0;
 
   /// Content padding constants
@@ -30,17 +30,38 @@ class AppDimensions {
   static const EdgeInsets cardPadding = EdgeInsets.all(20.0);
 }
 
+/// Rich blue gradients for hero/dashboard banners — never purple.
+class AppGradients {
+  AppGradients._();
+
+  static const LinearGradient hero = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFF2563EB), Color(0xFF38BDF8)],
+  );
+
+  static const LinearGradient heroDeep = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFF0F172A), Color(0xFF1D4ED8)],
+  );
+
+  static const LinearGradient screenWash = LinearGradient(
+    colors: [Color(0xFFF5F7FA), Color(0xFFF5F7FA)],
+  );
+}
+
 /// High-contrast accessible color palette for MindWeave.
 /// Guarantees contrast ratios > 7:1 (WCAG AAA) for primary text and controls.
 class AppColors {
   AppColors._();
 
-  // Primary High-Contrast Brand Tones (Deep Navy / Royal Indigo)
-  static const Color primaryDark = Color(0xFF0F3876); // High contrast dark blue
-  static const Color primary = Color(0xFF1E40AF); // Crisp royal blue
-  static const Color primaryLight = Color(0xFF3B82F6); // Soft bright blue
-  static const Color primaryContainer = Color(0xFFDBEAFE); // Tinted container
-  static const Color onPrimaryContainer = Color(0xFF0A2540); // Deep dark text
+  // Primary High-Contrast Brand Tones (Trustworthy Ocean Blue)
+  static const Color primaryDark = Color(0xFF1D4ED8); // Deep blue, AAA on white
+  static const Color primary = Color(0xFF2563EB); // Vivid friendly blue
+  static const Color primaryLight = Color(0xFF60A5FA); // Soft sky highlight
+  static const Color primaryContainer = Color(0xFFDBEAFE); // Tinted blue container
+  static const Color onPrimaryContainer = Color(0xFF1E3A8A); // Deep dark text
 
   // Secondary Clinical Tones (Deep Soothing Teal)
   static const Color secondary = Color(0xFF0F766E); // Medical accessible teal
@@ -52,12 +73,12 @@ class AppColors {
   static const Color tertiaryContainer = Color(0xFFFEF3C7);
   static const Color onTertiaryContainer = Color(0xFF78350F);
 
-  // Neutral High-Contrast Surfaces (Crisp light mode)
-  static const Color backgroundLight = Color(0xFFF8FAFC);
+  // Neutral High-Contrast Surfaces (Plain, flat light mode)
+  static const Color backgroundLight = Color(0xFFF5F7FA);
   static const Color surfaceLight = Color(0xFFFFFFFF);
   static const Color surfaceElevated = Color(0xFFFFFFFF);
-  static const Color borderLight = Color(0xFFCBD5E1);
-  static const Color borderFocus = Color(0xFF0F3876);
+  static const Color borderLight = Color(0xFFE5E9EF);
+  static const Color borderFocus = Color(0xFF1D4ED8);
 
   // High-Legibility Text Colors (WCAG AAA compliant against light backgrounds)
   static const Color textPrimary = Color(0xFF0F172A); // Ultra-dark slate (> 14:1)
@@ -81,6 +102,9 @@ class AppColors {
   static const Color info = Color(0xFF0369A1); // Deep cyan
   static const Color infoContainer = Color(0xFFE0F2FE);
   static const Color onInfoContainer = Color(0xFF075985);
+
+  // Soft shadow tint used under floating cards to keep the "lifted" feel
+  static const Color shadowTint = Color(0xFF1D4ED8);
 
   // Dark Mode High-Contrast Surfaces
   static const Color backgroundDark = Color(0xFF0B0F19);
@@ -224,8 +248,8 @@ class AppTheme {
       onSurface: AppColors.textPrimary,
       surfaceContainerHighest: AppColors.backgroundLight,
       outline: AppColors.borderLight,
-      outlineVariant: Color(0xFFE2E8F0),
-      shadow: Color(0x1A0F172A),
+      outlineVariant: Color(0xFFEDEAFB),
+      shadow: Color(0x1F4C3FD1),
     );
 
     return base.copyWith(
@@ -240,7 +264,7 @@ class AppTheme {
       appBarTheme: const AppBarTheme(
         elevation: 0,
         scrolledUnderElevation: 1,
-        backgroundColor: AppColors.surfaceLight,
+        backgroundColor: Colors.transparent,
         foregroundColor: AppColors.textPrimary,
         centerTitle: true,
         titleTextStyle: TextStyle(
@@ -255,18 +279,18 @@ class AppTheme {
         ),
       ),
 
-      // Rounded Button Themes with minimum 48x48 logical pixels
+      // Rounded, pill-leaning Button Themes with minimum 48x48 logical pixels
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           minimumSize: const Size(AppDimensions.minTouchTarget, AppDimensions.standardTouchTarget),
           backgroundColor: AppColors.primaryDark,
           foregroundColor: Colors.white,
-          disabledBackgroundColor: const Color(0xFFE2E8F0),
-          disabledForegroundColor: const Color(0xFF94A3B8),
-          elevation: 2,
+          disabledBackgroundColor: const Color(0xFFE5E1F7),
+          disabledForegroundColor: const Color(0xFF9C97BE),
+          elevation: 0,
           padding: AppDimensions.buttonPadding,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
+            borderRadius: BorderRadius.circular(AppDimensions.radiusPill),
           ),
           textStyle: const TextStyle(
             fontSize: 18.0,
@@ -283,7 +307,7 @@ class AppTheme {
           foregroundColor: Colors.white,
           padding: AppDimensions.buttonPadding,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
+            borderRadius: BorderRadius.circular(AppDimensions.radiusPill),
           ),
           textStyle: const TextStyle(
             fontSize: 18.0,
@@ -303,7 +327,7 @@ class AppTheme {
             width: 2.0, // High-visibility border
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
+            borderRadius: BorderRadius.circular(AppDimensions.radiusPill),
           ),
           textStyle: const TextStyle(
             fontSize: 18.0,
@@ -350,24 +374,21 @@ class AppTheme {
         ),
       ),
 
-      // Card Theme with high contrast outline & rounded edges
+      // Card Theme: soft floating cards with a gentle violet-tinted shadow
+      // instead of a hard outline, matching the friendly "lifted" reference style.
       cardTheme: CardThemeData(
         elevation: 0,
         color: AppColors.surfaceLight,
         margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 0),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppDimensions.radiusLarge),
-          side: const BorderSide(
-            color: AppColors.borderLight,
-            width: 1.5,
-          ),
         ),
       ),
 
       // Input Decoration Theme with high contrast focus & minimum 48px height
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.surfaceLight,
+        fillColor: AppColors.backgroundLight,
         contentPadding: AppDimensions.inputPadding,
         labelStyle: const TextStyle(
           fontSize: 16.0,
@@ -380,17 +401,11 @@ class AppTheme {
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
-          borderSide: const BorderSide(
-            color: AppColors.borderLight,
-            width: 2.0,
-          ),
+          borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
-          borderSide: const BorderSide(
-            color: AppColors.borderLight,
-            width: 2.0,
-          ),
+          borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
@@ -439,7 +454,6 @@ class AppTheme {
         elevation: 8,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppDimensions.radiusExtraLarge),
-          side: const BorderSide(color: AppColors.borderLight, width: 1.5),
         ),
         titleTextStyle: const TextStyle(
           fontSize: 22.0,
@@ -512,12 +526,12 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           minimumSize: const Size(AppDimensions.minTouchTarget, AppDimensions.standardTouchTarget),
-          backgroundColor: const Color(0xFF2563EB),
-          foregroundColor: Colors.white,
-          elevation: 2,
+          backgroundColor: const Color(0xFF60A5FA),
+          foregroundColor: const Color(0xFF0F172A),
+          elevation: 0,
           padding: AppDimensions.buttonPadding,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
+            borderRadius: BorderRadius.circular(AppDimensions.radiusPill),
           ),
           textStyle: const TextStyle(
             fontSize: 18.0,
@@ -540,3 +554,12 @@ class AppTheme {
     );
   }
 }
+
+/// A reusable soft card-lift shadow. Applied via [BoxDecoration.boxShadow].
+List<BoxShadow> softCardShadow({double opacity = 0.07}) => [
+      BoxShadow(
+        color: Colors.black.withValues(alpha: opacity),
+        blurRadius: 16.0,
+        offset: const Offset(0, 4),
+      ),
+    ];
